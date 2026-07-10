@@ -30,7 +30,9 @@ import com.suspended.app.presentation.theme.SpotifyBlack
 import com.suspended.app.presentation.theme.SpotifyGreen
 import com.suspended.app.presentation.theme.SpotifyLightGray
 import com.suspended.app.presentation.theme.SpotifyWhite
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun NowPlayingScreen(
     onNavigateBack: () -> Unit,
@@ -157,22 +159,21 @@ fun NowPlayingScreen(
                 
                 FloatingActionButton(
                     onClick = { viewModel.playPause() },
-                    shape = CircleShape,
+                    shape = MaterialTheme.shapes.extraLarge,
                     containerColor = SpotifyGreen,
                     contentColor = SpotifyBlack,
-                    modifier = Modifier.size(64.dp)
+                    modifier = Modifier.size(72.dp)
                 ) {
                     if (isLoading) {
-                        CircularProgressIndicator(
+                        androidx.compose.material3.LoadingIndicator(
                             modifier = Modifier.size(32.dp),
-                            color = SpotifyBlack,
-                            strokeWidth = 3.dp
+                            color = SpotifyBlack
                         )
                     } else {
                         Icon(
                             imageVector = if (isPlaying) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
                             contentDescription = "Play/Pause",
-                            modifier = Modifier.size(32.dp)
+                            modifier = Modifier.size(36.dp)
                         )
                     }
                 }

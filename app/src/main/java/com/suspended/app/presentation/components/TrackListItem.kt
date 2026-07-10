@@ -21,6 +21,9 @@ import coil3.compose.AsyncImage
 import com.suspended.app.domain.model.Track
 import com.suspended.app.presentation.theme.SpotifyWhite
 
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun TrackListItem(
     track: Track,
@@ -41,10 +44,9 @@ fun TrackListItem(
     ) {
         if (trackNumber != null) {
             if (isLoading) {
-                androidx.compose.material3.CircularProgressIndicator(
+                androidx.compose.material3.LoadingIndicator(
                     modifier = Modifier.size(24.dp).padding(end = 8.dp),
-                    color = MaterialTheme.colorScheme.primary,
-                    strokeWidth = 2.dp
+                    color = MaterialTheme.colorScheme.primary
                 )
             } else {
                 Text(
@@ -74,10 +76,9 @@ fun TrackListItem(
                             .background(androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.5f)),
                         contentAlignment = Alignment.Center
                     ) {
-                        androidx.compose.material3.CircularProgressIndicator(
+                        androidx.compose.material3.LoadingIndicator(
                             modifier = Modifier.size(24.dp),
-                            color = MaterialTheme.colorScheme.primary,
-                            strokeWidth = 2.dp
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
                 }

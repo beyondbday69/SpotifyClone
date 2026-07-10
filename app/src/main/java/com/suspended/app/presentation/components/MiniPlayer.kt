@@ -29,6 +29,9 @@ import coil3.compose.AsyncImage
 import com.suspended.app.domain.model.Track
 import com.suspended.app.presentation.theme.SpotifyWhite
 
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MiniPlayer(
     track: Track?,
@@ -99,10 +102,9 @@ fun MiniPlayer(
                     }
                     
                     if (isLoading) {
-                        androidx.compose.material3.CircularProgressIndicator(
+                        androidx.compose.material3.LoadingIndicator(
                             modifier = Modifier.size(24.dp).padding(4.dp),
-                            color = MaterialTheme.colorScheme.primary,
-                            strokeWidth = 2.dp
+                            color = MaterialTheme.colorScheme.primary
                         )
                     } else {
                         IconButton(onClick = onPlayPause) {

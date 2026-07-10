@@ -1,5 +1,6 @@
 package com.suspended.app.presentation.search
 
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,8 +11,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,7 +23,7 @@ import com.suspended.app.presentation.components.TrackListItem
 import com.suspended.app.presentation.theme.SpotifyBlack
 import com.suspended.app.presentation.theme.SpotifyWhite
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SearchScreen(
     viewModel: SearchViewModel = hiltViewModel(),
@@ -33,6 +33,8 @@ fun SearchScreen(
     val currentTrack by playerViewModel.currentTrack.collectAsStateWithLifecycle()
     val playbackState by playerViewModel.playbackState.collectAsStateWithLifecycle()
     val isPlaying by playerViewModel.isPlaying.collectAsStateWithLifecycle()
+
+    var active by remember { mutableStateOf(false) }
 
     val categories = listOf(
         "Pop" to listOf(Color(0xFFFF4081), Color(0xFFFF80AB)),
@@ -58,11 +60,11 @@ fun SearchScreen(
             query = state.query,
             onQueryChange = viewModel::onQueryChange,
             onSearch = { },
-            active = false,
-            onActiveChange = { },
+            active = active,
+            onActiveChange = { active = it },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(if (active) 0.dp else 16.dp),
             placeholder = { Text("What do you want to listen to?") },
             leadingIcon = { Icon(Icons.Rounded.Search, contentDescription = null) },
             colors = SearchBarDefaults.colors(
@@ -72,30 +74,36 @@ fun SearchScreen(
                     unfocusedTextColor = SpotifyWhite
                 )
             )
-        ) {}
-
-        if (state.isSearching) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-            }
-        } else if (state.query.isNotBlank() && state.results.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("No results found", color = SpotifyWhite)
-            }
-        } else if (state.query.isNotBlank()) {
-            LazyColumn(
-                contentPadding = PaddingValues(bottom = 120.dp)
-            ) {
-                items(state.results) { track ->
-                    TrackListItem(
-                        track = track,
-                        isPlaying = currentTrack?.id == track.id && isPlaying,
-                        isLoading = currentTrack?.id == track.id && playbackState == com.suspended.app.playback.PlaybackState.LOADING,
-                        onClick = { viewModel.playTrack(track) }
-                    )
+        ) {
+            if (state.isSearching) {
+                Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                    LoadingIndicator(color = MaterialTheme.colorScheme.primary)
+                }
+            } else if (state.query.isNotBlank() && state.results.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("No results found", color = SpotifyWhite, style = MaterialTheme.typography.titleMedium)
+                }
+            } else if (state.query.isNotBlank()) {
+                LazyColumn(
+                    contentPadding = PaddingValues(bottom = 120.dp)
+                ) {
+                    items(state.results, key = { it.id }) { track ->
+                        TrackListItem(
+                            track = track,
+                            isPlaying = currentTrack?.id == track.id && isPlaying,
+                            isLoading = currentTrack?.id == track.id && playbackState == com.suspended.app.playback.PlaybackState.LOADING,
+                            onClick = { viewModel.playTrack(track) },
+                            modifier = Modifier.animateItem(
+                                fadeInSpec = spring(),
+                                placementSpec = spring()
+                            )
+                        )
+                    }
                 }
             }
-        } else {
+        }
+
+        if (!active) {
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
                 contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 120.dp),
@@ -106,7 +114,10 @@ fun SearchScreen(
                     CategoryCard(
                         title = title,
                         gradientColors = colors,
-                        onClick = { viewModel.onQueryChange(title) }
+                        onClick = { 
+                            active = true
+                            viewModel.onQueryChange(title)
+                        }
                     )
                 }
             }
