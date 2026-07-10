@@ -70,7 +70,7 @@ fun TrackListItem(
                         modifier = Modifier
                             .size(56.dp)
                             .clip(RoundedCornerShape(8.dp))
-                            .androidx.compose.foundation.background(androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.5f)),
+                            .background(androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.5f)),
                         contentAlignment = Alignment.Center
                     ) {
                         androidx.compose.material3.CircularProgressIndicator(
