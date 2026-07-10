@@ -163,88 +163,92 @@ private fun MainScreen() {
         Screen.PlaylistDetail.route
     )
 
-    @OptIn(ExperimentalSharedTransitionApi::class)
+    @OptIn(ExperimentalSharedTransitionApi::class, androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
     SharedTransitionLayout {
         CompositionLocalProvider(LocalSharedTransitionScope provides this) {
-            Scaffold(
-                modifier = Modifier.fillMaxSize(),
-                containerColor = SpotifyBlack,
-                snackbarHost = { androidx.compose.material3.SnackbarHost(hostState = snackbarHostState) },
-                bottomBar = {
-                    if (showBottomBar) {
-                        Column(modifier = Modifier.fillMaxWidth()) {
-                            AnimatedVisibility(
-                                visible = currentTrack != null,
-                                enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
-                                exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
-                            ) {
-                                CompositionLocalProvider(LocalNavAnimatedVisibilityScope provides this) {
-                        MiniPlayer(
-                            track = currentTrack,
-                            isPlaying = isPlaying,
-                            isLoading = playbackState == com.suspended.app.playback.PlaybackState.LOADING,
-                            progress = progress,
-                            onPlayPause = { playerViewModel.playPause() },
-                            onSkipNext = { playerViewModel.skipNext() },
-                            onClick = {
-                                navController.navigate(Screen.NowPlaying.route) {
-                                    launchSingleTop = true
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
+            val scrollBehavior = androidx.compose.material3.FloatingToolbarDefaults.exitAlwaysScrollBehavior()
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .androidx.compose.ui.input.nestedscroll.nestedScroll(scrollBehavior.nestedScrollConnection)
+            ) {
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    containerColor = SpotifyBlack,
+                    snackbarHost = { androidx.compose.material3.SnackbarHost(hostState = snackbarHostState) }
+                ) { paddingValues ->
+                    // Calculate extra padding needed for overlays
+                    val toolbarHeight = if (showBottomBar) 80.dp else 0.dp
+                    val playerHeight = if (currentTrack != null) 80.dp else 0.dp
+                    val adjustedPadding = androidx.compose.foundation.layout.PaddingValues(
+                        top = paddingValues.calculateTopPadding(),
+                        bottom = paddingValues.calculateBottomPadding() + toolbarHeight + playerHeight,
+                        start = paddingValues.calculateLeftPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
+                        end = paddingValues.calculateRightPadding(androidx.compose.ui.unit.LayoutDirection.Ltr)
+                    )
+
+                    AppNavigation(
+                        navController = navController,
+                        paddingValues = adjustedPadding,
+                        modifier = Modifier.fillMaxSize()
+                    )
                 }
 
-                    NavigationBar(
-                        containerColor = SpotifyBlack,
-                        contentColor = Color.White
+                // Overlay for Player and Toolbar
+                Column(
+                    modifier = Modifier
+                        .align(androidx.compose.ui.Alignment.BottomCenter)
+                        .padding(bottom = 24.dp)
+                        .padding(horizontal = 8.dp)
+                        .androidx.compose.ui.zIndex(1f),
+                    horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
+                ) {
+                    AnimatedVisibility(
+                        visible = currentTrack != null,
+                        enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+                        exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
                     ) {
-                        bottomNavItems.forEach { item ->
-                            val isSelected = currentRoute == item.screen.route
-
-                            NavigationBarItem(
-                                selected = isSelected,
+                        CompositionLocalProvider(LocalNavAnimatedVisibilityScope provides this) {
+                            MiniPlayer(
+                                track = currentTrack,
+                                isPlaying = isPlaying,
+                                isLoading = playbackState == com.suspended.app.playback.PlaybackState.LOADING,
+                                progress = progress,
+                                onPlayPause = { playerViewModel.playPause() },
+                                onSkipNext = { playerViewModel.skipNext() },
                                 onClick = {
-                                    if (currentRoute != item.screen.route) {
-                                        navController.navigate(item.screen.route) {
-                                            popUpTo(navController.graph.findStartDestination().id) {
-                                                saveState = true
-                                            }
-                                            launchSingleTop = true
-                                            restoreState = true
-                                        }
+                                    navController.navigate(Screen.NowPlaying.route) {
+                                        launchSingleTop = true
                                     }
                                 },
-                                icon = {
-                                    Icon(
-                                        imageVector = item.icon,
-                                        contentDescription = item.label
-                                    )
-                                },
-                                label = {
-                                    Text(text = item.label)
-                                },
-                                colors = NavigationBarItemDefaults.colors(
-                                    selectedIconColor = SpotifyGreen,
-                                    selectedTextColor = SpotifyGreen,
-                                    unselectedIconColor = Color.White.copy(alpha = 0.7f),
-                                    unselectedTextColor = Color.White.copy(alpha = 0.7f),
-                                    indicatorColor = SpotifyGreen.copy(alpha = 0.15f)
-                                )
+                                modifier = Modifier.fillMaxWidth()
                             )
                         }
                     }
+
+                    if (showBottomBar) {
+                        androidx.compose.foundation.layout.Spacer(modifier = Modifier.androidx.compose.foundation.layout.height(12.dp))
+                        
+                        com.suspended.app.presentation.components.AppFloatingToolbar(
+                            items = bottomNavItems,
+                            currentRoute = currentRoute,
+                            onItemClick = { item ->
+                                if (currentRoute != item.screen.route) {
+                                    navController.navigate(item.screen.route) {
+                                        popUpTo(navController.graph.findStartDestination().id) {
+                                            saveState = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                }
+                            },
+                            scrollBehavior = scrollBehavior
+                        )
+                    }
                 }
             }
-        }
-    ) { paddingValues ->
-        AppNavigation(
-            navController = navController,
-            paddingValues = paddingValues,
-            modifier = Modifier.fillMaxSize()
-        )
-    }
         }
     }
 }
