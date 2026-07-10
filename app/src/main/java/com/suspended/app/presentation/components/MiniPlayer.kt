@@ -1,5 +1,7 @@
 package com.suspended.app.presentation.components
 
+import androidx.compose.ui.unit.IntOffset
+import kotlin.math.roundToInt
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.slideInVertically
@@ -69,7 +71,7 @@ fun MiniPlayer(
                 modifier = modifier
                     .fillMaxWidth(0.96f) // Slightly inset to float
                     .height(64.dp)
-                    .offset(x = offsetX.dp, y = offsetY.dp)
+                    .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
                     .pointerInput(Unit) {
                         detectDragGestures(
                             onDragEnd = {

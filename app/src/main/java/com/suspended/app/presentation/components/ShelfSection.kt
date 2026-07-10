@@ -21,6 +21,7 @@ import com.suspended.app.presentation.theme.SpotifyWhite
 fun <T> ShelfSection(
     title: String,
     items: List<T>,
+    key: ((T) -> Any)? = null,
     onSeeAll: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
     itemContent: @Composable (T) -> Unit
@@ -46,7 +47,7 @@ fun <T> ShelfSection(
             contentPadding = PaddingValues(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(items) { item ->
+            items(items, key = key) { item ->
                 itemContent(item)
             }
         }

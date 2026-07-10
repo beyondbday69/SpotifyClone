@@ -116,7 +116,7 @@ fun HomeScreen(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                         userScrollEnabled = false
                     ) {
-                        items(state.recentlyPlayed.take(6)) { track ->
+                        items(state.recentlyPlayed.take(6), key = { it.id }) { track ->
                             Surface(
                                 color = MaterialTheme.colorScheme.surfaceVariant,
                                 shape = RoundedCornerShape(4.dp),
@@ -145,7 +145,8 @@ fun HomeScreen(
                 item {
                     ShelfSection(
                         title = "Recently Played",
-                        items = state.recentlyPlayed
+                        items = state.recentlyPlayed,
+                        key = { it.id }
                     ) { track ->
                         ShelfItem(
                             title = track.title,
@@ -161,7 +162,8 @@ fun HomeScreen(
                 item {
                     ShelfSection(
                         title = "Made for You",
-                        items = state.libraryTracks.take(10)
+                        items = state.libraryTracks.take(10),
+                        key = { it.id }
                     ) { track ->
                         ShelfItem(
                             title = track.title,
@@ -177,7 +179,8 @@ fun HomeScreen(
                 item {
                     ShelfSection(
                         title = "Your Playlists",
-                        items = state.playlists
+                        items = state.playlists,
+                        key = { it.id }
                     ) { playlist ->
                         ShelfItem(
                             title = playlist.name,

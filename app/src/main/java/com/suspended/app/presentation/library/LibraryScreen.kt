@@ -86,7 +86,7 @@ fun LibraryScreen(
         ) {
             when (state.selectedFilter) {
                 LibraryFilter.PLAYLISTS -> {
-                    items(state.playlists) { playlist ->
+                    items(state.playlists, key = { it.id }) { playlist ->
                         TrackListItem(
                             track = com.suspended.app.domain.model.Track(
                                 id = playlist.id.toString(),
@@ -99,7 +99,7 @@ fun LibraryScreen(
                     }
                 }
                 LibraryFilter.TRACKS -> {
-                    items(state.tracks) { track ->
+                    items(state.tracks, key = { it.id }) { track ->
                         TrackListItem(
                             track = track,
                             onClick = { viewModel.playTrack(track) }
@@ -107,7 +107,7 @@ fun LibraryScreen(
                     }
                 }
                 LibraryFilter.ARTISTS -> {
-                    items(state.artists) { artist ->
+                    items(state.artists, key = { it.id }) { artist ->
                         TrackListItem(
                             track = com.suspended.app.domain.model.Track(
                                 id = artist.id,
@@ -120,7 +120,7 @@ fun LibraryScreen(
                     }
                 }
                 LibraryFilter.DOWNLOADED -> {
-                    items(state.downloadedTracks) { track ->
+                    items(state.downloadedTracks, key = { it.id }) { track ->
                         TrackListItem(
                             track = track,
                             onClick = { viewModel.playTrack(track) }

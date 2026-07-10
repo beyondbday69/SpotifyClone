@@ -1,5 +1,8 @@
 package com.suspended.app.presentation
 
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.windowInsetsPadding
 import android.Manifest
 import android.content.Intent
 import android.os.Build
@@ -91,7 +94,10 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        enableEdgeToEdge(
+            statusBarStyle = androidx.activity.SystemBarStyle.auto(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT),
+            navigationBarStyle = androidx.activity.SystemBarStyle.auto(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT)
+        )
 
         playbackController.onTrackNeedsResolve = { track ->
             val result = resolveStreamUrlUseCase(track.id)
@@ -214,6 +220,7 @@ private fun MainScreen() {
                 Column(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
+                        .windowInsetsPadding(androidx.compose.foundation.layout.WindowInsets.navigationBars)
                         .padding(bottom = 24.dp)
                         .padding(horizontal = 8.dp)
                         .zIndex(1f),
