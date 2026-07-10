@@ -66,6 +66,7 @@ data class BottomNavItem(
     val screen: Screen
 )
 
+@OptIn(androidx.compose.animation.ExperimentalSharedTransitionApi::class)
 val LocalSharedTransitionScope = staticCompositionLocalOf<SharedTransitionScope?> { null }
 val LocalNavAnimatedVisibilityScope = staticCompositionLocalOf<AnimatedVisibilityScope?> { null }
 
