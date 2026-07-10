@@ -72,4 +72,8 @@ class PlayerViewModel @Inject constructor(
     }
 
     fun clearError() = playbackController.clearError()
+
+    fun stop() {
+        playbackController.pause()
+    }
 }

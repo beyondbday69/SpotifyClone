@@ -69,6 +69,7 @@ fun SearchScreen(
             leadingIcon = { Icon(Icons.Rounded.Search, contentDescription = null) },
             colors = SearchBarDefaults.colors(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                dividerColor = Color.Transparent, // ← remove the line under the search bar
                 inputFieldColors = SearchBarDefaults.inputFieldColors(
                     focusedTextColor = SpotifyWhite,
                     unfocusedTextColor = SpotifyWhite
@@ -76,8 +77,16 @@ fun SearchScreen(
             )
         ) {
             if (state.isSearching) {
-                Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                    LoadingIndicator(color = MaterialTheme.colorScheme.primary)
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .fillMaxHeight(0.6f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    LoadingIndicator(
+                        modifier = Modifier.size(64.dp),
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 }
             } else if (state.query.isNotBlank() && state.results.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

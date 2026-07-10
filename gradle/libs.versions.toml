@@ -1,4 +1,6 @@
 [versions]
+palette = "1.0.0"
+datastore-preferences = "1.1.1"
 agp = "8.7.2"
 kotlin = "2.1.0"
 ksp = "2.1.0-1.0.29"
@@ -17,6 +19,8 @@ core-ktx = "1.15.0"
 material3 = "1.5.0-alpha01"
 
 [libraries]
+androidx-palette-ktx = { module = "androidx.palette:palette-ktx", version.ref = "palette" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore-preferences" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
 androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle" }

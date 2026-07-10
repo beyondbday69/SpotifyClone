@@ -22,21 +22,22 @@ val SuspendedShapes = Shapes(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SuspendedTheme(
-    dynamicColor: Boolean = true,
+    appTheme: AppTheme = AppTheme.SPOTIFY_DARK,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
+    val context = LocalContext.current
+    val colorScheme = when (appTheme) {
+        AppTheme.SPOTIFY_DARK -> DarkColorScheme
+        AppTheme.MIDNIGHT_BLUE -> MidnightBlueScheme
+        AppTheme.CRIMSON -> CrimsonScheme
+        AppTheme.DYNAMIC -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
             dynamicDarkColorScheme(context).copy(
                 background = SpotifyBlack,
                 surface = SpotifyDarkGray,
                 surfaceVariant = SpotifyMediumGray,
                 onBackground = SpotifyWhite,
                 onSurface = SpotifyWhite
-            )
-        }
-        else -> DarkColorScheme
+            ) else DarkColorScheme
     }
 
     MaterialExpressiveTheme(

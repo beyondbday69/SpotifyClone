@@ -99,7 +99,10 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            SuspendedTheme {
+            val themeViewModel: com.suspended.app.presentation.theme.ThemeViewModel = hiltViewModel()
+            val themeState by themeViewModel.appTheme.collectAsStateWithLifecycle()
+            
+            SuspendedTheme(appTheme = themeState) {
                 MainScreen()
             }
         }
@@ -229,6 +232,8 @@ private fun MainScreen() {
                                 progress = progress,
                                 onPlayPause = { playerViewModel.playPause() },
                                 onSkipNext = { playerViewModel.skipNext() },
+                                onSkipPrevious = { playerViewModel.skipPrevious() },
+                                onDismiss = { playerViewModel.stop() },
                                 onClick = {
                                     navController.navigate(Screen.NowPlaying.route) {
                                         launchSingleTop = true

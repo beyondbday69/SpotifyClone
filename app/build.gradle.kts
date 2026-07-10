@@ -59,6 +59,8 @@ chaquopy {
 }
 
 dependencies {
+    implementation(libs.androidx.palette.ktx)
+    implementation(libs.androidx.datastore.preferences)
     // Core Android
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

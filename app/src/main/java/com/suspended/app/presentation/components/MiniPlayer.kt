@@ -4,8 +4,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,21 +13,28 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Pause
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.SkipNext
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.suspended.app.domain.model.Track
 import com.suspended.app.presentation.theme.SpotifyWhite
+import kotlin.math.abs
 
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.animation.ExperimentalSharedTransitionApi
@@ -41,6 +48,8 @@ fun MiniPlayer(
     progress: Float,
     onPlayPause: () -> Unit,
     onSkipNext: () -> Unit,
+    onSkipPrevious: () -> Unit,
+    onDismiss: () -> Unit,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -53,10 +62,39 @@ fun MiniPlayer(
             val sharedTransitionScope = com.suspended.app.presentation.LocalSharedTransitionScope.current
             val animatedVisibilityScope = com.suspended.app.presentation.LocalNavAnimatedVisibilityScope.current
             
-            Column(
+            var offsetX by remember { mutableStateOf(0f) }
+            var offsetY by remember { mutableStateOf(0f) }
+
+            Surface(
                 modifier = modifier
-                    .fillMaxWidth()
+                    .fillMaxWidth(0.96f) // Slightly inset to float
                     .height(64.dp)
+                    .offset(x = offsetX.dp, y = offsetY.dp)
+                    .pointerInput(Unit) {
+                        detectDragGestures(
+                            onDragEnd = {
+                                if (offsetY > 100f) {
+                                    onDismiss()
+                                } else if (offsetX > 150f) {
+                                    onSkipPrevious()
+                                } else if (offsetX < -150f) {
+                                    onSkipNext()
+                                }
+                                offsetX = 0f
+                                offsetY = 0f
+                            },
+                            onDrag = { change, dragAmount ->
+                                change.consume()
+                                if (abs(dragAmount.x) > abs(dragAmount.y)) {
+                                    offsetX += dragAmount.x * 0.5f // Damped translation
+                                } else {
+                                    if (dragAmount.y > 0) { // Only allow swiping down
+                                        offsetY += dragAmount.y * 0.5f
+                                    }
+                                }
+                            }
+                        )
+                    }
                     .run {
                         if (sharedTransitionScope != null && animatedVisibilityScope != null) {
                             with(sharedTransitionScope) {
@@ -68,45 +106,53 @@ fun MiniPlayer(
                         } else {
                             this
                         }
-                    }
-                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                    .clip(RoundedCornerShape(8.dp))
-                    .clickable(onClick = onClick)
+                    },
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                tonalElevation = 2.dp,
+                shadowElevation = 8.dp,
+                onClick = onClick
             ) {
-                LinearProgressIndicator(
-                    progress = { progress },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(2.dp),
-                    color = MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f)
-                )
                 Row(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(horizontal = 8.dp),
+                        .padding(horizontal = 8.dp, vertical = 6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    AsyncImage(
-                        model = track.thumbnailUrl,
-                        contentDescription = "Cover",
-                        contentScale = ContentScale.Crop,
+                    Box(
                         modifier = Modifier
-                            .size(48.dp)
-                            .run {
-                                if (sharedTransitionScope != null && animatedVisibilityScope != null) {
-                                    with(sharedTransitionScope) {
-                                        sharedElement(
-                                            sharedContentState = rememberSharedContentState(key = "album_art"),
-                                            animatedVisibilityScope = animatedVisibilityScope
-                                        )
+                            .size(52.dp)
+                            .padding(2.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            progress = { progress },
+                            modifier = Modifier.fillMaxSize(),
+                            color = MaterialTheme.colorScheme.primary,
+                            trackColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f),
+                            strokeWidth = 2.dp
+                        )
+                        AsyncImage(
+                            model = track.thumbnailUrl,
+                            contentDescription = "Cover",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .size(44.dp)
+                                .run {
+                                    if (sharedTransitionScope != null && animatedVisibilityScope != null) {
+                                        with(sharedTransitionScope) {
+                                            sharedElement(
+                                                sharedContentState = rememberSharedContentState(key = "album_art"),
+                                                animatedVisibilityScope = animatedVisibilityScope
+                                            )
+                                        }
+                                    } else {
+                                        this
                                     }
-                                } else {
-                                    this
                                 }
-                            }
-                            .clip(RoundedCornerShape(4.dp))
-                    )
+                                .clip(CircleShape)
+                        )
+                    }
                     
                     Column(
                         modifier = Modifier
@@ -115,7 +161,7 @@ fun MiniPlayer(
                     ) {
                         Text(
                             text = track.title,
-                            style = MaterialTheme.typography.titleSmall,
+                            style = MaterialTheme.typography.titleMedium,
                             color = SpotifyWhite,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -131,7 +177,7 @@ fun MiniPlayer(
                     
                     if (isLoading) {
                         androidx.compose.material3.LoadingIndicator(
-                            modifier = Modifier.size(24.dp).padding(4.dp),
+                            modifier = Modifier.size(28.dp).padding(4.dp),
                             color = MaterialTheme.colorScheme.primary
                         )
                     } else {
@@ -139,7 +185,8 @@ fun MiniPlayer(
                             Icon(
                                 imageVector = if (isPlaying) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
                                 contentDescription = "Play/Pause",
-                                tint = SpotifyWhite
+                                tint = SpotifyWhite,
+                                modifier = Modifier.size(28.dp)
                             )
                         }
                     }
@@ -148,7 +195,8 @@ fun MiniPlayer(
                         Icon(
                             imageVector = Icons.Rounded.SkipNext,
                             contentDescription = "Skip Next",
-                            tint = SpotifyWhite
+                            tint = SpotifyWhite,
+                            modifier = Modifier.size(28.dp)
                         )
                     }
                 }

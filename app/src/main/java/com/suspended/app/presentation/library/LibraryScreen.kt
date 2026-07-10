@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,9 +25,11 @@ import com.suspended.app.presentation.components.ShelfItem
 @Composable
 fun LibraryScreen(
     onNavigateToPlaylist: (Long) -> Unit,
-    viewModel: LibraryViewModel = hiltViewModel()
+    viewModel: LibraryViewModel = hiltViewModel(),
+    themeViewModel: com.suspended.app.presentation.theme.ThemeViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    var showThemeSheet by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -45,8 +48,13 @@ fun LibraryScreen(
                 style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
                 color = SpotifyWhite
             )
-            IconButton(onClick = { viewModel.showCreatePlaylistDialog(true) }) {
-                Icon(Icons.Rounded.Add, contentDescription = "Add Playlist", tint = SpotifyWhite)
+            Row {
+                IconButton(onClick = { showThemeSheet = true }) {
+                    Icon(Icons.Rounded.Settings, contentDescription = "Settings", tint = SpotifyWhite)
+                }
+                IconButton(onClick = { viewModel.showCreatePlaylistDialog(true) }) {
+                    Icon(Icons.Rounded.Add, contentDescription = "Add Playlist", tint = SpotifyWhite)
+                }
             }
         }
 
@@ -150,5 +158,50 @@ fun LibraryScreen(
                 }
             }
         )
+    }
+
+    if (showThemeSheet) {
+        val currentTheme by themeViewModel.appTheme.collectAsStateWithLifecycle()
+        ModalBottomSheet(
+            onDismissRequest = { showThemeSheet = false },
+            containerColor = MaterialTheme.colorScheme.surface
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .padding(bottom = 32.dp)
+            ) {
+                Text(
+                    text = "App Theme",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    com.suspended.app.presentation.theme.AppTheme.values().forEach { themeOption ->
+                        FilterChip(
+                            selected = currentTheme == themeOption,
+                            onClick = { themeViewModel.setTheme(themeOption) },
+                            label = { 
+                                Text(
+                                    text = themeOption.name.lowercase().replace("_", " ").replaceFirstChar { it.uppercase() }
+                                ) 
+                            },
+                            colors = FilterChipDefaults.filterChipColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                            ),
+                            shape = CircleShape
+                        )
+                    }
+                }
+            }
+        }
     }
 }

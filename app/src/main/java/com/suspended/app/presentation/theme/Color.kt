@@ -29,3 +29,31 @@ val DarkColorScheme = darkColorScheme(
     onSurfaceVariant = OnSurfaceVariant,
     error = ErrorRed
 )
+
+val MidnightBlueScheme = darkColorScheme(
+    primary = Color(0xFF4F86F7),
+    onPrimary = Color.Black,
+    primaryContainer = Color(0xFF2E5CB8),
+    secondary = Color(0xFFA0C0FF),
+    background = Color(0xFF0D1321),
+    surface = Color(0xFF161B29),
+    surfaceVariant = Color(0xFF1D2438),
+    onBackground = Color.White,
+    onSurface = Color.White,
+    onSurfaceVariant = Color(0xFF90A4AE),
+    error = ErrorRed
+)
+
+val CrimsonScheme = darkColorScheme(
+    primary = Color(0xFFE63950),
+    onPrimary = Color.White,
+    primaryContainer = Color(0xFFB32338),
+    secondary = Color(0xFFFFB3BC),
+    background = Color(0xFF1A0E10),
+    surface = Color(0xFF241417),
+    surfaceVariant = Color(0xFF331D21),
+    onBackground = Color.White,
+    onSurface = Color.White,
+    onSurfaceVariant = Color(0xFFBCAAA4),
+    error = ErrorRed
+)
