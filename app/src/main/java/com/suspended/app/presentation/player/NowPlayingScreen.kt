@@ -25,7 +25,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.drawable.toBitmap
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.palette.graphics.Palette
@@ -80,10 +79,11 @@ fun NowPlayingScreen(
                         .build()
                     val result = loader.execute(request)
                     if (result is SuccessResult) {
-                        val drawable = result.image.asDrawable(context.resources)
-                        val bitmap = drawable.toBitmap()
-                        Palette.from(bitmap).generate().dominantSwatch?.rgb?.let { rgb ->
-                            dominantColor = Color(rgb)
+                        val bitmap = (result.image as? coil3.BitmapImage)?.bitmap
+                        if (bitmap != null) {
+                            Palette.from(bitmap).generate().dominantSwatch?.rgb?.let { rgb ->
+                                dominantColor = Color(rgb)
+                            }
                         }
                     }
                 } catch (e: Exception) {
