@@ -228,8 +228,8 @@ private fun MainScreen() {
                 ) {
                     AnimatedVisibility(
                         visible = currentTrack != null,
-                        enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
-                        exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
+                        enter = fadeIn(animationSpec = androidx.compose.animation.core.tween(300)),
+                        exit = fadeOut(animationSpec = androidx.compose.animation.core.tween(300))
                     ) {
                         CompositionLocalProvider(LocalNavAnimatedVisibilityScope provides this) {
                             MiniPlayer(

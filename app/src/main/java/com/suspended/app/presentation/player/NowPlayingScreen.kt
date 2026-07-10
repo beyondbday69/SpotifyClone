@@ -105,18 +105,6 @@ fun NowPlayingScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .run {
-                if (sharedTransitionScope != null && animatedVisibilityScope != null) {
-                    with(sharedTransitionScope) {
-                        sharedBounds(
-                            sharedContentState = rememberSharedContentState(key = "player_bounds"),
-                            animatedVisibilityScope = animatedVisibilityScope
-                        )
-                    }
-                } else {
-                    this
-                }
-            }
             .background(
                 Brush.verticalGradient(
                     colors = listOf(dominantColor, SpotifyBlack),
@@ -166,18 +154,6 @@ fun NowPlayingScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(1f)
-                    .run {
-                        if (sharedTransitionScope != null && animatedVisibilityScope != null) {
-                            with(sharedTransitionScope) {
-                                sharedElement(
-                                    sharedContentState = rememberSharedContentState(key = "album_art"),
-                                    animatedVisibilityScope = animatedVisibilityScope
-                                )
-                            }
-                        } else {
-                            this
-                        }
-                    },
                 contentAlignment = Alignment.Center
             ) {
                 AsyncImage(

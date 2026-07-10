@@ -96,18 +96,6 @@ fun MiniPlayer(
                                 }
                             }
                         )
-                    }
-                    .run {
-                        if (sharedTransitionScope != null && animatedVisibilityScope != null) {
-                            with(sharedTransitionScope) {
-                                sharedBounds(
-                                    sharedContentState = rememberSharedContentState(key = "player_bounds"),
-                                    animatedVisibilityScope = animatedVisibilityScope
-                                )
-                            }
-                        } else {
-                            this
-                        }
                     },
                 shape = RoundedCornerShape(12.dp),
                 color = MaterialTheme.colorScheme.surfaceVariant,
@@ -140,18 +128,6 @@ fun MiniPlayer(
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
                                 .size(44.dp)
-                                .run {
-                                    if (sharedTransitionScope != null && animatedVisibilityScope != null) {
-                                        with(sharedTransitionScope) {
-                                            sharedElement(
-                                                sharedContentState = rememberSharedContentState(key = "album_art"),
-                                                animatedVisibilityScope = animatedVisibilityScope
-                                            )
-                                        }
-                                    } else {
-                                        this
-                                    }
-                                }
                                 .clip(CircleShape)
                         )
                     }
