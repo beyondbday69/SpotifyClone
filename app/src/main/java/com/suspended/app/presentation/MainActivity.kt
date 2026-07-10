@@ -100,6 +100,9 @@ private fun MainScreen() {
     val isPlaying by playerViewModel.isPlaying.collectAsStateWithLifecycle()
     val progress by playerViewModel.progress.collectAsStateWithLifecycle()
 
+    val playbackState by playerViewModel.playbackState.collectAsStateWithLifecycle()
+    val errorMessage by playerViewModel.errorMessage.collectAsStateWithLifecycle()
+
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
@@ -124,6 +127,18 @@ private fun MainScreen() {
             serviceStarted = true
         }
     }
+    
+    val snackbarHostState = androidx.compose.runtime.remember { androidx.compose.material3.SnackbarHostState() }
+    
+    LaunchedEffect(errorMessage) {
+        if (errorMessage != null) {
+            snackbarHostState.showSnackbar(
+                message = errorMessage!!,
+                duration = androidx.compose.material3.SnackbarDuration.Short
+            )
+            playerViewModel.clearError()
+        }
+    }
 
     val bottomNavItems = listOf(
         BottomNavItem(label = "Home", icon = Icons.Rounded.Home, screen = Screen.Home),
@@ -141,6 +156,7 @@ private fun MainScreen() {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = SpotifyBlack,
+        snackbarHost = { androidx.compose.material3.SnackbarHost(hostState = snackbarHostState) },
         bottomBar = {
             if (showBottomBar) {
                 Column(modifier = Modifier.fillMaxWidth()) {
@@ -152,6 +168,7 @@ private fun MainScreen() {
                         MiniPlayer(
                             track = currentTrack,
                             isPlaying = isPlaying,
+                            isLoading = playbackState == com.suspended.app.playback.PlaybackState.LOADING,
                             progress = progress,
                             onPlayPause = { playerViewModel.playPause() },
                             onSkipNext = { playerViewModel.skipNext() },

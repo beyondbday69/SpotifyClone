@@ -39,8 +39,16 @@ class YtDlpDataSource @Inject constructor(
 
     suspend fun resolveStreamUrl(videoId: String): String = withContext(Dispatchers.IO) {
         try {
-            bridge.callAttr("resolve", videoId).toString()
+            android.util.Log.d("YtDlpDataSource", "Resolving stream url for $videoId via yt-dlp...")
+            val result = bridge.callAttr("resolve", videoId).toString()
+            if (result.isBlank()) {
+                android.util.Log.w("YtDlpDataSource", "yt-dlp returned an empty stream URL for $videoId")
+            } else {
+                android.util.Log.d("YtDlpDataSource", "Successfully resolved stream URL: $result")
+            }
+            result
         } catch (e: Exception) {
+            android.util.Log.e("YtDlpDataSource", "yt-dlp resolve failed for $videoId: ${e.message}", e)
             throw RuntimeException("yt-dlp resolve failed: ${e.message}", e)
         }
     }

@@ -33,6 +33,7 @@ import com.suspended.app.presentation.theme.SpotifyWhite
 fun MiniPlayer(
     track: Track?,
     isPlaying: Boolean,
+    isLoading: Boolean = false,
     progress: Float,
     onPlayPause: () -> Unit,
     onSkipNext: () -> Unit,
@@ -97,12 +98,20 @@ fun MiniPlayer(
                         )
                     }
                     
-                    IconButton(onClick = onPlayPause) {
-                        Icon(
-                            imageVector = if (isPlaying) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
-                            contentDescription = "Play/Pause",
-                            tint = SpotifyWhite
+                    if (isLoading) {
+                        androidx.compose.material3.CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp).padding(4.dp),
+                            color = MaterialTheme.colorScheme.primary,
+                            strokeWidth = 2.dp
                         )
+                    } else {
+                        IconButton(onClick = onPlayPause) {
+                            Icon(
+                                imageVector = if (isPlaying) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
+                                contentDescription = "Play/Pause",
+                                tint = SpotifyWhite
+                            )
+                        }
                     }
                     
                     IconButton(onClick = onSkipNext) {

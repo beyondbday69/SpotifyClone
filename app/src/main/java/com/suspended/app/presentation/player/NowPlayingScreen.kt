@@ -152,6 +152,9 @@ fun NowPlayingScreen(
                 IconButton(onClick = { viewModel.skipPrevious() }) {
                     Icon(Icons.Rounded.SkipPrevious, contentDescription = "Previous", tint = SpotifyWhite, modifier = Modifier.size(36.dp))
                 }
+                val playbackState by viewModel.playbackState.collectAsStateWithLifecycle()
+                val isLoading = playbackState == com.suspended.app.playback.PlaybackState.LOADING
+                
                 FloatingActionButton(
                     onClick = { viewModel.playPause() },
                     shape = CircleShape,
@@ -159,11 +162,19 @@ fun NowPlayingScreen(
                     contentColor = SpotifyBlack,
                     modifier = Modifier.size(64.dp)
                 ) {
-                    Icon(
-                        imageVector = if (isPlaying) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
-                        contentDescription = "Play/Pause",
-                        modifier = Modifier.size(32.dp)
-                    )
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(32.dp),
+                            color = SpotifyBlack,
+                            strokeWidth = 3.dp
+                        )
+                    } else {
+                        Icon(
+                            imageVector = if (isPlaying) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
+                            contentDescription = "Play/Pause",
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
                 }
                 IconButton(onClick = { viewModel.skipNext() }) {
                     Icon(Icons.Rounded.SkipNext, contentDescription = "Next", tint = SpotifyWhite, modifier = Modifier.size(36.dp))

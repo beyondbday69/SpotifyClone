@@ -27,7 +27,8 @@ class PlayerViewModel @Inject constructor(
     val isShuffled: StateFlow<Boolean> = playbackController.isShuffled
     val repeatMode: StateFlow<RepeatMode> = playbackController.repeatMode
     val queue: StateFlow<List<Track>> = playbackController.queueManager.queue
-
+    val playbackState = playbackController.playbackState
+    val errorMessage = playbackController.errorMessage
     init {
         playbackController.onTrackNeedsResolve = { track ->
             val result = resolveStreamUrlUseCase(track.id)
@@ -69,4 +70,6 @@ class PlayerViewModel @Inject constructor(
             musicRepository.addToLibrary(track)
         }
     }
+
+    fun clearError() = playbackController.clearError()
 }

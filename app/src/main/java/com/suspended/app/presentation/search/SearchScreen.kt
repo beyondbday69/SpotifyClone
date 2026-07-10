@@ -26,9 +26,13 @@ import com.suspended.app.presentation.theme.SpotifyWhite
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
-    viewModel: SearchViewModel = hiltViewModel()
+    viewModel: SearchViewModel = hiltViewModel(),
+    playerViewModel: com.suspended.app.presentation.player.PlayerViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val currentTrack by playerViewModel.currentTrack.collectAsStateWithLifecycle()
+    val playbackState by playerViewModel.playbackState.collectAsStateWithLifecycle()
+    val isPlaying by playerViewModel.isPlaying.collectAsStateWithLifecycle()
 
     val categories = listOf(
         "Pop" to listOf(Color(0xFFFF4081), Color(0xFFFF80AB)),
@@ -85,6 +89,8 @@ fun SearchScreen(
                 items(state.results) { track ->
                     TrackListItem(
                         track = track,
+                        isPlaying = currentTrack?.id == track.id && isPlaying,
+                        isLoading = currentTrack?.id == track.id && playbackState == com.suspended.app.playback.PlaybackState.LOADING,
                         onClick = { viewModel.playTrack(track) }
                     )
                 }

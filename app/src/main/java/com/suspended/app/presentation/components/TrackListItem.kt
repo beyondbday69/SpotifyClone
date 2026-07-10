@@ -27,6 +27,7 @@ fun TrackListItem(
     modifier: Modifier = Modifier,
     trackNumber: Int? = null,
     isPlaying: Boolean = false,
+    isLoading: Boolean = false,
     onMoreClick: (() -> Unit)? = null,
     trailingContent: @Composable (() -> Unit)? = null
 ) {
@@ -38,23 +39,48 @@ fun TrackListItem(
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (trackNumber != null) {
-            Text(
-                text = trackNumber.toString(),
-                style = MaterialTheme.typography.bodyMedium,
-                color = if (isPlaying) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier
-                    .width(32.dp)
-                    .padding(end = 12.dp)
-            )
+            if (isLoading) {
+                androidx.compose.material3.CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp).padding(end = 8.dp),
+                    color = MaterialTheme.colorScheme.primary,
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Text(
+                    text = trackNumber.toString(),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (isPlaying) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .width(32.dp)
+                        .padding(end = 12.dp)
+                )
+            }
         } else {
-            AsyncImage(
-                model = track.thumbnailUrl,
-                contentDescription = "Track Cover",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(56.dp)
-                    .clip(RoundedCornerShape(8.dp))
-            )
+            Box(contentAlignment = Alignment.Center) {
+                AsyncImage(
+                    model = track.thumbnailUrl,
+                    contentDescription = "Track Cover",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                )
+                if (isLoading) {
+                    androidx.compose.foundation.layout.Box(
+                        modifier = Modifier
+                            .size(56.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .androidx.compose.foundation.background(androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.5f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        androidx.compose.material3.CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = MaterialTheme.colorScheme.primary,
+                            strokeWidth = 2.dp
+                        )
+                    }
+                }
+            }
             Spacer(modifier = Modifier.width(12.dp))
         }
 
