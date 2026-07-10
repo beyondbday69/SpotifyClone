@@ -68,7 +68,7 @@ fun SearchScreen(
             placeholder = { Text("What do you want to listen to?") },
             leadingIcon = { Icon(Icons.Rounded.Search, contentDescription = null) },
             colors = SearchBarDefaults.colors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                containerColor = if (active) SpotifyBlack else MaterialTheme.colorScheme.surfaceVariant,
                 dividerColor = Color.Transparent, // ← remove the line under the search bar
                 inputFieldColors = SearchBarDefaults.inputFieldColors(
                     focusedTextColor = SpotifyWhite,

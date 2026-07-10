@@ -161,15 +161,10 @@ fun NowPlayingScreen(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            AsyncImage(
-                model = track?.thumbnailUrl,
-                contentDescription = "Cover",
-                contentScale = ContentScale.Crop,
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(1f)
-                    .scale(albumScale)
-                    .shadow(16.dp, RoundedCornerShape(20.dp))
                     .run {
                         if (sharedTransitionScope != null && animatedVisibilityScope != null) {
                             with(sharedTransitionScope) {
@@ -181,9 +176,23 @@ fun NowPlayingScreen(
                         } else {
                             this
                         }
-                    }
-                    .clip(RoundedCornerShape(20.dp))
-            )
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                AsyncImage(
+                    model = track?.thumbnailUrl?.replace("hqdefault.jpg", "maxresdefault.jpg")?.replace(Regex("=w\\d+-h\\d+.*"), "=w1080-h1080"),
+                    contentDescription = "Cover",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .androidx.compose.ui.graphics.graphicsLayer {
+                            scaleX = albumScale
+                            scaleY = albumScale
+                        }
+                        .shadow(16.dp, RoundedCornerShape(20.dp))
+                        .clip(RoundedCornerShape(20.dp))
+                )
+            }
 
             Spacer(modifier = Modifier.weight(1f))
 
