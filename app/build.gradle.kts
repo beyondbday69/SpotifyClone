@@ -52,7 +52,7 @@ android {
 chaquopy {
     defaultConfig {
         pip {
-            install("yt-dlp==2026.07.04")
+            install("yt-dlp==2026.7.4")
         }
     }
 }
