@@ -35,37 +35,34 @@ fun AppFloatingToolbar(
         expanded = true, // We keep it expanded since scroll behavior handles visibility
         scrollBehavior = scrollBehavior,
         modifier = modifier,
-        containerColor = FloatingToolbarDefaults.vibrantFloatingToolbarColors().containerColor
+        colors = FloatingToolbarDefaults.vibrantFloatingToolbarColors(),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp)
     ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 8.dp)
-        ) {
-            items.forEach { item ->
-                val isSelected = currentRoute == item.screen.route
-                
-                val containerColor by androidx.compose.animation.animateColorAsState(
-                    targetValue = if (isSelected) MaterialTheme.colorScheme.secondaryContainer else androidx.compose.ui.graphics.Color.Transparent,
-                    animationSpec = spring(dampingRatio = 0.8f, stiffness = 400f)
+        items.forEach { item ->
+            val isSelected = currentRoute == item.screen.route
+            
+            val containerColor by androidx.compose.animation.animateColorAsState(
+                targetValue = if (isSelected) MaterialTheme.colorScheme.secondaryContainer else androidx.compose.ui.graphics.Color.Transparent,
+                animationSpec = spring(dampingRatio = 0.8f, stiffness = 400f)
+            )
+            
+            val contentColor by androidx.compose.animation.animateColorAsState(
+                targetValue = if (isSelected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+                animationSpec = spring(dampingRatio = 0.8f, stiffness = 400f)
+            )
+            
+            IconButton(
+                onClick = { onItemClick(item) },
+                colors = IconButtonDefaults.iconButtonColors(
+                    containerColor = containerColor,
+                    contentColor = contentColor
+                ),
+                modifier = Modifier.clip(CircleShape)
+            ) {
+                Icon(
+                    imageVector = item.icon,
+                    contentDescription = item.label
                 )
-                
-                val contentColor by androidx.compose.animation.animateColorAsState(
-                    targetValue = if (isSelected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
-                    animationSpec = spring(dampingRatio = 0.8f, stiffness = 400f)
-                )
-                
-                IconButton(
-                    onClick = { onItemClick(item) },
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = containerColor,
-                        contentColor = contentColor
-                    ),
-                    modifier = Modifier.clip(CircleShape)
-                ) {
-                    Icon(
-                        imageVector = item.icon,
-                        contentDescription = item.label
-                    )
-                }
             }
         }
     }

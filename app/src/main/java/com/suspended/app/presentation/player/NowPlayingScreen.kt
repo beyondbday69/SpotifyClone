@@ -116,7 +116,7 @@ fun NowPlayingScreen(
                         if (sharedTransitionScope != null && animatedVisibilityScope != null) {
                             with(sharedTransitionScope) {
                                 sharedElement(
-                                    state = rememberSharedContentState(key = "album_art"),
+                                    sharedContentState = rememberSharedContentState(key = "album_art"),
                                     animatedVisibilityScope = animatedVisibilityScope
                                 )
                             }
