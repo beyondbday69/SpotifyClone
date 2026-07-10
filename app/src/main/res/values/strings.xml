@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Suspended</string>
+    <string name="search_hint">What do you want to listen to?</string>
+    <string name="home">Home</string>
+    <string name="search">Search</string>
+    <string name="library">Your Library</string>
+    <string name="now_playing">Now Playing</string>
+    <string name="good_morning">Good morning</string>
+    <string name="good_afternoon">Good afternoon</string>
+    <string name="good_evening">Good evening</string>
+    <string name="recently_played">Recently Played</string>
+    <string name="made_for_you">Made for You</string>
+    <string name="your_playlists">Your Playlists</string>
+    <string name="no_results_found">No results found</string>
+</resources>
