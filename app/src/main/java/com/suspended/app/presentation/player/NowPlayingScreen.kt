@@ -153,7 +153,7 @@ fun NowPlayingScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(1f)
+                    .aspectRatio(1f),
                 contentAlignment = Alignment.Center
             ) {
                 AsyncImage(
