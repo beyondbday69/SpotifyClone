@@ -22,8 +22,19 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Home
@@ -41,10 +52,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -169,12 +176,14 @@ private fun MainScreen() {
     @OptIn(ExperimentalSharedTransitionApi::class, androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
     SharedTransitionLayout {
         CompositionLocalProvider(LocalSharedTransitionScope provides this) {
-            val scrollBehavior = androidx.compose.material3.FloatingToolbarDefaults.exitAlwaysScrollBehavior()
+            val scrollBehavior = androidx.compose.material3.FloatingToolbarDefaults.exitAlwaysScrollBehavior(
+                exitDirection = androidx.compose.material3.FloatingToolbarExitDirection.Bottom
+            )
 
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .androidx.compose.ui.input.nestedscroll.nestedScroll(scrollBehavior.nestedScrollConnection)
+                    .nestedScroll(scrollBehavior.nestedScrollConnection)
             ) {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
@@ -184,11 +193,11 @@ private fun MainScreen() {
                     // Calculate extra padding needed for overlays
                     val toolbarHeight = if (showBottomBar) 80.dp else 0.dp
                     val playerHeight = if (currentTrack != null) 80.dp else 0.dp
-                    val adjustedPadding = androidx.compose.foundation.layout.PaddingValues(
+                    val adjustedPadding = PaddingValues(
                         top = paddingValues.calculateTopPadding(),
                         bottom = paddingValues.calculateBottomPadding() + toolbarHeight + playerHeight,
-                        start = paddingValues.calculateLeftPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
-                        end = paddingValues.calculateRightPadding(androidx.compose.ui.unit.LayoutDirection.Ltr)
+                        start = paddingValues.calculateLeftPadding(LayoutDirection.Ltr),
+                        end = paddingValues.calculateRightPadding(LayoutDirection.Ltr)
                     )
 
                     AppNavigation(
@@ -201,11 +210,11 @@ private fun MainScreen() {
                 // Overlay for Player and Toolbar
                 Column(
                     modifier = Modifier
-                        .align(androidx.compose.ui.Alignment.BottomCenter)
+                        .align(Alignment.BottomCenter)
                         .padding(bottom = 24.dp)
                         .padding(horizontal = 8.dp)
-                        .androidx.compose.ui.zIndex(1f),
-                    horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
+                        .zIndex(1f),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     AnimatedVisibility(
                         visible = currentTrack != null,
@@ -231,7 +240,7 @@ private fun MainScreen() {
                     }
 
                     if (showBottomBar) {
-                        androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
                         
                         com.suspended.app.presentation.components.AppFloatingToolbar(
                             items = bottomNavItems,
