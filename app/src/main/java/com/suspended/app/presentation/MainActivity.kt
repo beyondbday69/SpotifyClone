@@ -116,8 +116,8 @@ private fun MainScreen() {
         }
     }
 
-    LaunchedEffect(currentTrack) {
-        if (currentTrack != null && !serviceStarted) {
+    LaunchedEffect(isPlaying) {
+        if (isPlaying && !serviceStarted) {
             val context = navController.context
             val intent = Intent(context, PlaybackService::class.java)
             context.startService(intent)
