@@ -132,7 +132,7 @@ fun NowPlayingScreen(
                 progress = progress,
                 currentPosition = currentPosition,
                 duration = duration,
-                onSeek = { viewModel.seekTo((it * duration).toLong()) }
+                onSeek = { viewModel.seekTo(it) }
             )
 
             Spacer(modifier = Modifier.height(16.dp))

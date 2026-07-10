@@ -65,20 +65,13 @@ fun AppNavigation(
         }
 
         composable(route = Screen.Search.route) {
-            SearchScreen(
-                onNavigateToNowPlaying = {
-                    navController.navigate(Screen.NowPlaying.route)
-                }
-            )
+            SearchScreen()
         }
 
         composable(route = Screen.Library.route) {
             LibraryScreen(
                 onNavigateToPlaylist = { playlistId ->
                     navController.navigate(Screen.PlaylistDetail.createRoute(playlistId))
-                },
-                onNavigateToNowPlaying = {
-                    navController.navigate(Screen.NowPlaying.route)
                 }
             )
         }
@@ -128,9 +121,6 @@ fun AppNavigation(
             PlaylistDetailScreen(
                 onNavigateBack = {
                     navController.popBackStack()
-                },
-                onNavigateToNowPlaying = {
-                    navController.navigate(Screen.NowPlaying.route)
                 }
             )
         }
