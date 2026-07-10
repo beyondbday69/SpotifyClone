@@ -109,7 +109,7 @@ fun MiniPlayer(
                             this
                         }
                     },
-                shape = CircleShape,
+                shape = RoundedCornerShape(12.dp),
                 color = MaterialTheme.colorScheme.surfaceVariant,
                 tonalElevation = 2.dp,
                 shadowElevation = 8.dp,
