@@ -183,7 +183,7 @@ private fun MainScreen() {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .nestedScroll(scrollBehavior.nestedScrollConnection)
+                    .nestedScroll(scrollBehavior)
             ) {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
