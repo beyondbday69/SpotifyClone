@@ -103,11 +103,13 @@ fun AppNavigation(
                 )
             }
         ) {
-            NowPlayingScreen(
-                onNavigateBack = {
-                    navController.popBackStack()
-                }
-            )
+            androidx.compose.runtime.CompositionLocalProvider(com.suspended.app.presentation.LocalNavAnimatedVisibilityScope provides this) {
+                NowPlayingScreen(
+                    onNavigateBack = {
+                        navController.popBackStack()
+                    }
+                )
+            }
         }
 
         composable(

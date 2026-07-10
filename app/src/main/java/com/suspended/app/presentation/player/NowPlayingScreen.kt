@@ -32,7 +32,9 @@ import com.suspended.app.presentation.theme.SpotifyLightGray
 import com.suspended.app.presentation.theme.SpotifyWhite
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun NowPlayingScreen(
     onNavigateBack: () -> Unit,
@@ -51,9 +53,24 @@ fun NowPlayingScreen(
         return
     }
 
+    val sharedTransitionScope = com.suspended.app.presentation.LocalSharedTransitionScope.current
+    val animatedVisibilityScope = com.suspended.app.presentation.LocalNavAnimatedVisibilityScope.current
+
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .run {
+                if (sharedTransitionScope != null && animatedVisibilityScope != null) {
+                    with(sharedTransitionScope) {
+                        sharedBounds(
+                            sharedContentState = rememberSharedContentState(key = "player_bounds"),
+                            animatedVisibilityScope = animatedVisibilityScope
+                        )
+                    }
+                } else {
+                    this
+                }
+            }
             .background(
                 Brush.verticalGradient(
                     colors = listOf(Color(0xFF3B3B3B), SpotifyBlack),
@@ -95,6 +112,18 @@ fun NowPlayingScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(1f)
+                    .run {
+                        if (sharedTransitionScope != null && animatedVisibilityScope != null) {
+                            with(sharedTransitionScope) {
+                                sharedElement(
+                                    state = rememberSharedContentState(key = "album_art"),
+                                    animatedVisibilityScope = animatedVisibilityScope
+                                )
+                            }
+                        } else {
+                            this
+                        }
+                    }
                     .clip(RoundedCornerShape(12.dp))
             )
 

@@ -10,6 +10,12 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -59,6 +65,9 @@ data class BottomNavItem(
     val icon: ImageVector,
     val screen: Screen
 )
+
+val LocalSharedTransitionScope = staticCompositionLocalOf<SharedTransitionScope?> { null }
+val LocalNavAnimatedVisibilityScope = staticCompositionLocalOf<AnimatedVisibilityScope?> { null }
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -153,18 +162,22 @@ private fun MainScreen() {
         Screen.PlaylistDetail.route
     )
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        containerColor = SpotifyBlack,
-        snackbarHost = { androidx.compose.material3.SnackbarHost(hostState = snackbarHostState) },
-        bottomBar = {
-            if (showBottomBar) {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    AnimatedVisibility(
-                        visible = currentTrack != null,
-                        enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
-                        exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
-                    ) {
+    @OptIn(ExperimentalSharedTransitionApi::class)
+    SharedTransitionLayout {
+        CompositionLocalProvider(LocalSharedTransitionScope provides this) {
+            Scaffold(
+                modifier = Modifier.fillMaxSize(),
+                containerColor = SpotifyBlack,
+                snackbarHost = { androidx.compose.material3.SnackbarHost(hostState = snackbarHostState) },
+                bottomBar = {
+                    if (showBottomBar) {
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            AnimatedVisibility(
+                                visible = currentTrack != null,
+                                enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+                                exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
+                            ) {
+                                CompositionLocalProvider(LocalNavAnimatedVisibilityScope provides this) {
                         MiniPlayer(
                             track = currentTrack,
                             isPlaying = isPlaying,
@@ -180,6 +193,7 @@ private fun MainScreen() {
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
+                }
 
                     NavigationBar(
                         containerColor = SpotifyBlack,
@@ -229,5 +243,7 @@ private fun MainScreen() {
             paddingValues = paddingValues,
             modifier = Modifier.fillMaxSize()
         )
+    }
+        }
     }
 }

@@ -30,8 +30,9 @@ import com.suspended.app.domain.model.Track
 import com.suspended.app.presentation.theme.SpotifyWhite
 
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun MiniPlayer(
     track: Track?,
@@ -49,10 +50,25 @@ fun MiniPlayer(
         exit = slideOutVertically(spring()) { it }
     ) {
         if (track != null) {
+            val sharedTransitionScope = com.suspended.app.presentation.LocalSharedTransitionScope.current
+            val animatedVisibilityScope = com.suspended.app.presentation.LocalNavAnimatedVisibilityScope.current
+            
             Column(
                 modifier = modifier
                     .fillMaxWidth()
                     .height(64.dp)
+                    .run {
+                        if (sharedTransitionScope != null && animatedVisibilityScope != null) {
+                            with(sharedTransitionScope) {
+                                sharedBounds(
+                                    sharedContentState = rememberSharedContentState(key = "player_bounds"),
+                                    animatedVisibilityScope = animatedVisibilityScope
+                                )
+                            }
+                        } else {
+                            this
+                        }
+                    }
                     .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
                     .clip(RoundedCornerShape(8.dp))
                     .clickable(onClick = onClick)
@@ -77,6 +93,18 @@ fun MiniPlayer(
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .size(48.dp)
+                            .run {
+                                if (sharedTransitionScope != null && animatedVisibilityScope != null) {
+                                    with(sharedTransitionScope) {
+                                        sharedElement(
+                                            state = rememberSharedContentState(key = "album_art"),
+                                            animatedVisibilityScope = animatedVisibilityScope
+                                        )
+                                    }
+                                } else {
+                                    this
+                                }
+                            }
                             .clip(RoundedCornerShape(4.dp))
                     )
                     
