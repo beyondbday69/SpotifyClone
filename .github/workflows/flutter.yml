@@ -20,7 +20,16 @@ jobs:
         flutter-version: '3.24.0' # Or the latest stable
 
     - name: Scaffold Flutter native folders
-      run: flutter create --org com.suspended.app --project-name suspended_flutter .
+      run: |
+        flutter create --org com.suspended.app --project-name suspended_flutter .
+        # Flutter 3.24 sometimes defaults to Kotlin 1.7.1 which causes metadata errors with new AndroidX libs.
+        # Patch the settings.gradle / build.gradle to use Kotlin 1.9.24
+        if [ -f android/settings.gradle ]; then
+          sed -i 's/org.jetbrains.kotlin.android" version "1.7.1"/org.jetbrains.kotlin.android" version "1.9.24"/' android/settings.gradle
+        fi
+        if [ -f android/build.gradle ]; then
+          sed -i "s/ext.kotlin_version = '1.7.1'/ext.kotlin_version = '1.9.24'/" android/build.gradle
+        fi
 
     - name: Install dependencies
       run: flutter pub get
