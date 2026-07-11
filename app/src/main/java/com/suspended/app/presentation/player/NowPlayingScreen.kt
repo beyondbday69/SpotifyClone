@@ -1,7 +1,9 @@
 package com.suspended.app.presentation.player
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -29,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.palette.graphics.Palette
-import coil3.ImageLoader
+import coil3.SingletonImageLoader
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.SuccessResult
@@ -67,13 +69,27 @@ fun NowPlayingScreen(
     }
 
     val context = LocalContext.current
-    var dominantColor by remember { mutableStateOf(Color(0xFF3B3B3B)) }
+    var targetDominantColor by remember { mutableStateOf(Color(0xFF3B3B3B)) }
+
+    // Animate the gradient color smoothly instead of snapping the instant Palette
+    // result lands, which was causing a visible jump/jank right as the "big player"
+    // slide-up transition was still running.
+    val dominantColor by animateColorAsState(
+        targetValue = targetDominantColor,
+        animationSpec = tween(durationMillis = 500),
+        label = "dominantColor"
+    )
 
     LaunchedEffect(track?.thumbnailUrl) {
         track?.thumbnailUrl?.let { url ->
             withContext(Dispatchers.IO) {
                 try {
-                    val loader = ImageLoader(context)
+                    // Reuse the app's shared/singleton image loader (same one AsyncImage
+                    // below uses) instead of constructing a brand new ImageLoader every
+                    // time this screen opens. Building a new loader spins up its own
+                    // disk cache + dispatchers, which was competing for CPU with the
+                    // slide-up animation and made it stutter.
+                    val loader = SingletonImageLoader.get(context)
                     val request = ImageRequest.Builder(context)
                         .data(url)
                         .allowHardware(false)
@@ -83,7 +99,7 @@ fun NowPlayingScreen(
                         val bitmap = (result.image as? coil3.BitmapImage)?.bitmap
                         if (bitmap != null) {
                             Palette.from(bitmap).generate().dominantSwatch?.rgb?.let { rgb ->
-                                dominantColor = Color(rgb)
+                                targetDominantColor = Color(rgb)
                             }
                         }
                     }
