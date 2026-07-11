@@ -61,25 +61,37 @@ fun LibraryScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            val filters = LibraryFilter.values()
-            filters.forEach { filter ->
-                FilterChip(
-                    selected = state.selectedFilter == filter,
-                    onClick = { viewModel.setFilter(filter) },
-                    label = { Text(filter.name.lowercase().replaceFirstChar { it.uppercase() }) },
-                    colors = FilterChipDefaults.filterChipColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                        labelColor = SpotifyWhite,
-                        selectedContainerColor = MaterialTheme.colorScheme.primary,
-                        selectedLabelColor = SpotifyBlack
-                    ),
-                    shape = CircleShape
-                )
+            val filters = listOf(
+                LibraryFilter.PLAYLISTS,
+                LibraryFilter.ARTISTS,
+                LibraryFilter.DOWNLOADED,
+                LibraryFilter.LIKED
+            )
+            SingleChoiceSegmentedButtonRow {
+                filters.forEachIndexed { index, filter ->
+                    SegmentedButton(
+                        shape = SegmentedButtonDefaults.itemShape(
+                            index = index,
+                            count = filters.size
+                        ),
+                        selected = state.selectedFilter == filter,
+                        onClick = { viewModel.setFilter(filter) },
+                        colors = SegmentedButtonDefaults.colors(
+                            activeContainerColor = MaterialTheme.colorScheme.primary,
+                            activeContentColor = SpotifyBlack,
+                            activeBorderColor = MaterialTheme.colorScheme.primary,
+                            inactiveContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            inactiveContentColor = SpotifyWhite,
+                            inactiveBorderColor = MaterialTheme.colorScheme.surfaceVariant
+                        ),
+                        label = { Text(filter.name.lowercase().replaceFirstChar { it.uppercase() }) }
+                    )
+                }
             }
         }
+
 
         LazyColumn(
             contentPadding = PaddingValues(bottom = 120.dp)
