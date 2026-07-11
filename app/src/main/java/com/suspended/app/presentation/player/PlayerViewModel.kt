@@ -5,10 +5,13 @@ import androidx.lifecycle.viewModelScope
 import com.suspended.app.domain.model.Track
 import com.suspended.app.domain.repository.MusicRepository
 import com.suspended.app.domain.usecase.ResolveStreamUrlUseCase
+import com.suspended.app.domain.usecase.ToggleLikeUseCase
 import com.suspended.app.playback.PlaybackController
 import com.suspended.app.playback.RepeatMode
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -16,8 +19,10 @@ import javax.inject.Inject
 class PlayerViewModel @Inject constructor(
     private val playbackController: PlaybackController,
     private val resolveStreamUrlUseCase: ResolveStreamUrlUseCase,
-    private val musicRepository: MusicRepository
+    private val musicRepository: MusicRepository,
+    private val toggleLikeUseCase: ToggleLikeUseCase
 ) : ViewModel() {
+
 
     val currentTrack: StateFlow<Track?> = playbackController.currentTrack
     val isPlaying: StateFlow<Boolean> = playbackController.isPlaying
@@ -29,6 +34,9 @@ class PlayerViewModel @Inject constructor(
     val queue: StateFlow<List<Track>> = playbackController.queueManager.queue
     val playbackState = playbackController.playbackState
     val errorMessage = playbackController.errorMessage
+    val likedTrackIds: StateFlow<Set<String>> = musicRepository.getLikedTrackIds()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
+
     init {
         playbackController.onTrackNeedsResolve = { track ->
             val result = resolveStreamUrlUseCase(track.id)
@@ -65,9 +73,9 @@ class PlayerViewModel @Inject constructor(
         playbackController.toggleRepeat()
     }
 
-    fun addToLibrary(track: Track) {
+    fun toggleLike(track: Track) {
         viewModelScope.launch {
-            musicRepository.addToLibrary(track)
+            toggleLikeUseCase(track)
         }
     }
 

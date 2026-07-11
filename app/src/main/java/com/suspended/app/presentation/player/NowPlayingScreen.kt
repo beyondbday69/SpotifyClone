@@ -62,6 +62,8 @@ fun NowPlayingScreen(
     val duration by viewModel.duration.collectAsStateWithLifecycle()
     val isShuffled by viewModel.isShuffled.collectAsStateWithLifecycle()
     val repeatMode by viewModel.repeatMode.collectAsStateWithLifecycle()
+    val likedTrackIds by viewModel.likedTrackIds.collectAsStateWithLifecycle()
+    val isLiked = track?.id?.let { likedTrackIds.contains(it) } == true
 
     if (track == null) {
         Box(modifier = Modifier.fillMaxSize().background(SpotifyBlack))
@@ -209,11 +211,11 @@ fun NowPlayingScreen(
                         maxLines = 1
                     )
                 }
-                IconButton(onClick = { track?.let { viewModel.addToLibrary(it) } }) {
+                IconButton(onClick = { track?.let { viewModel.toggleLike(it) } }) {
                     Icon(
-                        imageVector = if (track?.isDownloaded == true) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
-                        contentDescription = "Like",
-                        tint = if (track?.isDownloaded == true) SpotifyGreen else SpotifyWhite
+                        imageVector = if (isLiked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
+                        contentDescription = if (isLiked) "Unlike" else "Like",
+                        tint = if (isLiked) SpotifyGreen else SpotifyWhite
                     )
                 }
             }
