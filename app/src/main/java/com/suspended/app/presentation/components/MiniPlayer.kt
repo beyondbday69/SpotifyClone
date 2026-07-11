@@ -128,6 +128,18 @@ fun MiniPlayer(
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
                                 .size(44.dp)
+                                .run {
+                                    if (sharedTransitionScope != null && animatedVisibilityScope != null) {
+                                        with(sharedTransitionScope) {
+                                            sharedElement(
+                                                sharedContentState = rememberSharedContentState(key = "album_art_${track.id}"),
+                                                animatedVisibilityScope = animatedVisibilityScope
+                                            )
+                                        }
+                                    } else {
+                                        this
+                                    }
+                                }
                                 .clip(CircleShape)
                         )
                     }

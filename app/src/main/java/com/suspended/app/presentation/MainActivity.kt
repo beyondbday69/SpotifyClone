@@ -227,7 +227,7 @@ private fun MainScreen() {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     AnimatedVisibility(
-                        visible = currentTrack != null,
+                        visible = currentTrack != null && currentRoute != Screen.NowPlaying.route,
                         enter = fadeIn(animationSpec = androidx.compose.animation.core.tween(300)),
                         exit = fadeOut(animationSpec = androidx.compose.animation.core.tween(300))
                     ) {
