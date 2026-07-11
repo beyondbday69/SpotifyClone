@@ -19,10 +19,11 @@ import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -65,6 +66,8 @@ import com.suspended.app.playback.PlaybackController
 import com.suspended.app.playback.PlaybackService
 import com.suspended.app.presentation.components.MiniPlayer
 import com.suspended.app.presentation.navigation.AppNavigation
+import com.suspended.app.presentation.navigation.ExpoOutEasing
+import com.suspended.app.presentation.navigation.PLAYER_TRANSITION_MS
 import com.suspended.app.presentation.navigation.Screen
 import com.suspended.app.presentation.player.PlayerViewModel
 import com.suspended.app.presentation.theme.SpotifyBlack
@@ -234,19 +237,21 @@ private fun MainScreen() {
                         .zIndex(1f),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    // Mini bar just scales down + fades (no slide) as big player
+                    // slides/fades over it — matches ref html mini-player collapse.
                     AnimatedVisibility(
                         visible = currentTrack != null && currentRoute != Screen.NowPlaying.route,
-                        enter = slideInVertically(
-                            initialOffsetY = { it },
-                            animationSpec = androidx.compose.animation.core.tween(350, easing = androidx.compose.animation.core.FastOutSlowInEasing)
+                        enter = scaleIn(
+                            initialScale = 0.9f,
+                            animationSpec = tween(PLAYER_TRANSITION_MS, easing = ExpoOutEasing)
                         ) + fadeIn(
-                            animationSpec = androidx.compose.animation.core.tween(350, easing = androidx.compose.animation.core.FastOutSlowInEasing)
+                            animationSpec = tween(PLAYER_TRANSITION_MS, easing = ExpoOutEasing)
                         ),
-                        exit = slideOutVertically(
-                            targetOffsetY = { it },
-                            animationSpec = androidx.compose.animation.core.tween(350, easing = androidx.compose.animation.core.FastOutSlowInEasing)
+                        exit = scaleOut(
+                            targetScale = 0.9f,
+                            animationSpec = tween(PLAYER_TRANSITION_MS, easing = ExpoOutEasing)
                         ) + fadeOut(
-                            animationSpec = androidx.compose.animation.core.tween(350, easing = androidx.compose.animation.core.FastOutSlowInEasing)
+                            animationSpec = tween(PLAYER_TRANSITION_MS, easing = ExpoOutEasing)
                         )
                     ) {
                         MiniPlayer(
