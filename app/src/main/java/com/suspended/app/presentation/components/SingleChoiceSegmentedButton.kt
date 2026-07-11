@@ -12,6 +12,8 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
 
 /**
  * Single-select segmented button row (Day / Month / Week), following the
@@ -45,8 +47,13 @@ fun SingleChoiceSegmentedButton(modifier: Modifier = Modifier) {
                 onClick = { selectedIndex = index },
                 selected = index == selectedIndex,
                 colors = colors,
+                border = SegmentedButtonDefaults.borderStroke(
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                    width = 1.dp
+                ),
                 label = { Text(label) }
             )
+
         }
     }
 }

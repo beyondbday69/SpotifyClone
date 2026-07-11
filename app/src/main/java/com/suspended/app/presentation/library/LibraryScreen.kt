@@ -86,9 +86,14 @@ fun LibraryScreen(
                             inactiveContentColor = SpotifyWhite,
                             inactiveBorderColor = MaterialTheme.colorScheme.surfaceVariant
                         ),
+                        border = SegmentedButtonDefaults.borderStroke(
+                            color = SpotifyWhite.copy(alpha = 0.3f),
+                            width = 1.dp
+                        ),
                         label = { Text(filter.name.lowercase().replaceFirstChar { it.uppercase() }) }
                     )
                 }
+
             }
         }
 
