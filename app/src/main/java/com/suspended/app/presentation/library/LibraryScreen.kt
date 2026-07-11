@@ -102,6 +102,8 @@ fun LibraryScreen(
                     items(state.tracks, key = { it.id }) { track ->
                         TrackListItem(
                             track = track,
+                            isLiked = state.likedTrackIds.contains(track.id),
+                            onLikeClick = { viewModel.toggleLike(track) },
                             onClick = { viewModel.playTrack(track) }
                         )
                     }
@@ -123,8 +125,38 @@ fun LibraryScreen(
                     items(state.downloadedTracks, key = { it.id }) { track ->
                         TrackListItem(
                             track = track,
+                            isLiked = state.likedTrackIds.contains(track.id),
+                            onLikeClick = { viewModel.toggleLike(track) },
                             onClick = { viewModel.playTrack(track) }
                         )
+                    }
+                }
+                LibraryFilter.LIKED -> {
+                    if (state.likedSongs.isEmpty()) {
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(32.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "Songs you like will appear here.\nTap the heart on any track to save it.",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                )
+                            }
+                        }
+                    } else {
+                        items(state.likedSongs, key = { it.id }) { track ->
+                            TrackListItem(
+                                track = track,
+                                isLiked = true,
+                                onLikeClick = { viewModel.toggleLike(track) },
+                                onClick = { viewModel.playTrack(track) }
+                            )
+                        }
                     }
                 }
             }

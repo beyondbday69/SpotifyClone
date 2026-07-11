@@ -24,7 +24,12 @@ object DatabaseModule {
             context,
             AppDatabase::class.java,
             "suspended_db"
-        ).build()
+        )
+            // No explicit Migration is defined yet for the v1 -> v2 schema change
+            // (adding isLiked/likedAt to tracks), so fall back to a destructive
+            // migration rather than crashing existing installs.
+            .fallbackToDestructiveMigration()
+            .build()
     }
 
     @Provides

@@ -17,7 +17,7 @@ import com.suspended.app.data.local.entity.TrackEntity
         PlaylistTrackCrossRef::class,
         StreamCacheEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {

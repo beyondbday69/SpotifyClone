@@ -101,6 +101,8 @@ fun SearchScreen(
                             track = track,
                             isPlaying = currentTrack?.id == track.id && isPlaying,
                             isLoading = currentTrack?.id == track.id && playbackState == com.suspended.app.playback.PlaybackState.LOADING,
+                            isLiked = state.likedTrackIds.contains(track.id),
+                            onLikeClick = { viewModel.toggleLike(track) },
                             onClick = { viewModel.playTrack(track) },
                             modifier = Modifier.animateItem(
                                 fadeInSpec = spring(),

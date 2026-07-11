@@ -5,6 +5,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -19,6 +21,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.suspended.app.domain.model.Track
+import com.suspended.app.presentation.theme.SpotifyGreen
 import com.suspended.app.presentation.theme.SpotifyWhite
 
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -32,6 +35,8 @@ fun TrackListItem(
     trackNumber: Int? = null,
     isPlaying: Boolean = false,
     isLoading: Boolean = false,
+    isLiked: Boolean? = null,
+    onLikeClick: (() -> Unit)? = null,
     onMoreClick: (() -> Unit)? = null,
     trailingContent: @Composable (() -> Unit)? = null
 ) {
@@ -104,10 +109,22 @@ fun TrackListItem(
                 overflow = TextOverflow.Ellipsis
             )
         }
-        
+
         if (trailingContent != null) {
             trailingContent()
-        } else if (onMoreClick != null) {
+        }
+
+        if (isLiked != null && onLikeClick != null) {
+            IconButton(onClick = onLikeClick) {
+                Icon(
+                    imageVector = if (isLiked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                    contentDescription = if (isLiked) "Unlike" else "Like",
+                    tint = if (isLiked) SpotifyGreen else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        if (onMoreClick != null) {
             IconButton(onClick = onMoreClick) {
                 Icon(
                     imageVector = Icons.Rounded.MoreVert,

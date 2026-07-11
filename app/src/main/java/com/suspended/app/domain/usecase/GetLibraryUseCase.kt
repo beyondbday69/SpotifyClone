@@ -12,7 +12,8 @@ data class LibraryData(
     val tracks: Flow<List<Track>>,
     val artists: Flow<List<Artist>>,
     val playlists: Flow<List<Playlist>>,
-    val downloaded: Flow<List<Track>>
+    val downloaded: Flow<List<Track>>,
+    val liked: Flow<List<Track>>
 )
 
 class GetLibraryUseCase @Inject constructor(
@@ -24,7 +25,8 @@ class GetLibraryUseCase @Inject constructor(
             tracks = musicRepository.getLibraryTracks(),
             artists = musicRepository.getLibraryArtists(),
             playlists = musicRepository.getPlaylists(),
-            downloaded = downloadRepository.getDownloadedTracks()
+            downloaded = downloadRepository.getDownloadedTracks(),
+            liked = musicRepository.getLikedSongs()
         )
     }
 }
