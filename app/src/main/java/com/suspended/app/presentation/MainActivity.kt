@@ -36,7 +36,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -44,12 +43,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.LibraryMusic
 import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -188,15 +184,10 @@ private fun MainScreen() {
     @OptIn(ExperimentalSharedTransitionApi::class, androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
     SharedTransitionLayout {
         CompositionLocalProvider(LocalSharedTransitionScope provides this) {
-            val scrollBehavior = androidx.compose.material3.FloatingToolbarDefaults.exitAlwaysScrollBehavior(
-                exitDirection = androidx.compose.material3.FloatingToolbarExitDirection.Bottom
-            )
-
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .nestedScroll(scrollBehavior)
+                modifier = Modifier.fillMaxSize()
             ) {
+
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     containerColor = SpotifyBlack,
@@ -274,8 +265,8 @@ private fun MainScreen() {
 
                     if (showBottomBar) {
                         Spacer(modifier = Modifier.height(12.dp))
-                        
-                        com.suspended.app.presentation.components.AppFloatingToolbar(
+
+                        com.suspended.app.presentation.components.AppNavigationBar(
                             items = bottomNavItems,
                             currentRoute = currentRoute,
                             onItemClick = { item ->
@@ -289,9 +280,10 @@ private fun MainScreen() {
                                     }
                                 }
                             },
-                            scrollBehavior = scrollBehavior
+                            modifier = Modifier.fillMaxWidth()
                         )
                     }
+
                 }
             }
         }
