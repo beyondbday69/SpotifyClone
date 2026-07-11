@@ -201,10 +201,18 @@ private fun MainScreen() {
                 ) { paddingValues ->
                     // Calculate extra padding needed for overlays
                     val toolbarHeight = if (showBottomBar) 80.dp else 0.dp
-                    val playerHeight = if (currentTrack != null) 80.dp else 0.dp
+                    val playerHeight = if (currentTrack != null && currentRoute != Screen.NowPlaying.route) 80.dp else 0.dp
+                    
+                    val targetBottomPadding = paddingValues.calculateBottomPadding() + toolbarHeight + playerHeight
+                    val animatedBottomPadding by androidx.compose.animation.core.animateDpAsState(
+                        targetValue = targetBottomPadding,
+                        animationSpec = androidx.compose.animation.core.tween(350, easing = androidx.compose.animation.core.FastOutSlowInEasing),
+                        label = "bottomPadding"
+                    )
+
                     val adjustedPadding = PaddingValues(
                         top = paddingValues.calculateTopPadding(),
-                        bottom = paddingValues.calculateBottomPadding() + toolbarHeight + playerHeight,
+                        bottom = animatedBottomPadding,
                         start = paddingValues.calculateLeftPadding(LayoutDirection.Ltr),
                         end = paddingValues.calculateRightPadding(LayoutDirection.Ltr)
                     )
