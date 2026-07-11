@@ -81,47 +81,33 @@ fun AppNavigation(
             enterTransition = {
                 slideInVertically(
                     initialOffsetY = { fullHeight -> fullHeight },
-                    animationSpec = androidx.compose.animation.core.spring(
-                        dampingRatio = androidx.compose.animation.core.Spring.DampingRatioLowBouncy,
-                        stiffness = androidx.compose.animation.core.Spring.StiffnessMediumLow
-                    )
+                    animationSpec = tween(durationMillis = 350, easing = androidx.compose.animation.core.FastOutSlowInEasing)
                 )
             },
             exitTransition = {
                 slideOutVertically(
                     targetOffsetY = { fullHeight -> fullHeight },
-                    animationSpec = androidx.compose.animation.core.spring(
-                        dampingRatio = androidx.compose.animation.core.Spring.DampingRatioNoBouncy,
-                        stiffness = androidx.compose.animation.core.Spring.StiffnessMediumLow
-                    )
+                    animationSpec = tween(durationMillis = 350, easing = androidx.compose.animation.core.FastOutSlowInEasing)
                 )
             },
             popEnterTransition = {
                 slideInVertically(
                     initialOffsetY = { fullHeight -> fullHeight },
-                    animationSpec = androidx.compose.animation.core.spring(
-                        dampingRatio = androidx.compose.animation.core.Spring.DampingRatioLowBouncy,
-                        stiffness = androidx.compose.animation.core.Spring.StiffnessMediumLow
-                    )
+                    animationSpec = tween(durationMillis = 350, easing = androidx.compose.animation.core.FastOutSlowInEasing)
                 )
             },
             popExitTransition = {
                 slideOutVertically(
                     targetOffsetY = { fullHeight -> fullHeight },
-                    animationSpec = androidx.compose.animation.core.spring(
-                        dampingRatio = androidx.compose.animation.core.Spring.DampingRatioNoBouncy,
-                        stiffness = androidx.compose.animation.core.Spring.StiffnessMediumLow
-                    )
+                    animationSpec = tween(durationMillis = 350, easing = androidx.compose.animation.core.FastOutSlowInEasing)
                 )
             }
         ) {
-            androidx.compose.runtime.CompositionLocalProvider(com.suspended.app.presentation.LocalNavAnimatedVisibilityScope provides this) {
-                NowPlayingScreen(
-                    onNavigateBack = {
-                        navController.popBackStack()
-                    }
-                )
-            }
+            NowPlayingScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
         }
 
         composable(

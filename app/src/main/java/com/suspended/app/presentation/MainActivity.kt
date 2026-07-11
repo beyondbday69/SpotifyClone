@@ -228,27 +228,35 @@ private fun MainScreen() {
                 ) {
                     AnimatedVisibility(
                         visible = currentTrack != null && currentRoute != Screen.NowPlaying.route,
-                        enter = fadeIn(animationSpec = androidx.compose.animation.core.tween(300)),
-                        exit = fadeOut(animationSpec = androidx.compose.animation.core.tween(300))
+                        enter = slideInVertically(
+                            initialOffsetY = { it },
+                            animationSpec = androidx.compose.animation.core.tween(350, easing = androidx.compose.animation.core.FastOutSlowInEasing)
+                        ) + fadeIn(
+                            animationSpec = androidx.compose.animation.core.tween(350, easing = androidx.compose.animation.core.FastOutSlowInEasing)
+                        ),
+                        exit = slideOutVertically(
+                            targetOffsetY = { it },
+                            animationSpec = androidx.compose.animation.core.tween(350, easing = androidx.compose.animation.core.FastOutSlowInEasing)
+                        ) + fadeOut(
+                            animationSpec = androidx.compose.animation.core.tween(350, easing = androidx.compose.animation.core.FastOutSlowInEasing)
+                        )
                     ) {
-                        CompositionLocalProvider(LocalNavAnimatedVisibilityScope provides this) {
-                            MiniPlayer(
-                                track = currentTrack,
-                                isPlaying = isPlaying,
-                                isLoading = playbackState == com.suspended.app.playback.PlaybackState.LOADING,
-                                progress = progress,
-                                onPlayPause = { playerViewModel.playPause() },
-                                onSkipNext = { playerViewModel.skipNext() },
-                                onSkipPrevious = { playerViewModel.skipPrevious() },
-                                onDismiss = { playerViewModel.stop() },
-                                onClick = {
-                                    navController.navigate(Screen.NowPlaying.route) {
-                                        launchSingleTop = true
-                                    }
-                                },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
+                        MiniPlayer(
+                            track = currentTrack,
+                            isPlaying = isPlaying,
+                            isLoading = playbackState == com.suspended.app.playback.PlaybackState.LOADING,
+                            progress = progress,
+                            onPlayPause = { playerViewModel.playPause() },
+                            onSkipNext = { playerViewModel.skipNext() },
+                            onSkipPrevious = { playerViewModel.skipPrevious() },
+                            onDismiss = { playerViewModel.stop() },
+                            onClick = {
+                                navController.navigate(Screen.NowPlaying.route) {
+                                    launchSingleTop = true
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
 
                     if (showBottomBar) {

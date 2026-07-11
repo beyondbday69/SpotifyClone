@@ -61,8 +61,6 @@ fun MiniPlayer(
         exit = slideOutVertically(spring()) { it }
     ) {
         if (track != null) {
-            val sharedTransitionScope = com.suspended.app.presentation.LocalSharedTransitionScope.current
-            val animatedVisibilityScope = com.suspended.app.presentation.LocalNavAnimatedVisibilityScope.current
             
             var offsetX by remember { mutableStateOf(0f) }
             var offsetY by remember { mutableStateOf(0f) }
@@ -128,18 +126,6 @@ fun MiniPlayer(
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
                                 .size(44.dp)
-                                .run {
-                                    if (sharedTransitionScope != null && animatedVisibilityScope != null) {
-                                        with(sharedTransitionScope) {
-                                            sharedElement(
-                                                sharedContentState = rememberSharedContentState(key = "album_art_${track.id}"),
-                                                animatedVisibilityScope = animatedVisibilityScope
-                                            )
-                                        }
-                                    } else {
-                                        this
-                                    }
-                                }
                                 .clip(CircleShape)
                         )
                     }
