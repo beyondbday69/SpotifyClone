@@ -20,4 +20,15 @@ interface MusicRepository {
     suspend fun addToRecentlyPlayed(track: Track)
     suspend fun getCachedStreamUrl(trackId: String): String?
     suspend fun cacheStreamUrl(trackId: String, url: String, ttlSeconds: Long = 3600L)
+
+    /** Liked ("Liked Songs") tracks, most recently liked first. */
+    fun getLikedSongs(): Flow<List<Track>>
+
+    /** Ids of all currently liked tracks, for quick lookup/highlighting in lists. */
+    fun getLikedTrackIds(): Flow<Set<String>>
+
+    /** Flips the liked state of [track], persisting it (and the track itself) if needed. Returns the new liked state. */
+    suspend fun toggleLike(track: Track): Boolean
+
+    suspend fun setLiked(track: Track, liked: Boolean)
 }

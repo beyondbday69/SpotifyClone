@@ -150,4 +150,40 @@ class MusicRepositoryImpl @Inject constructor(
         )
         cacheDao.insertCache(cacheEntity)
     }
+
+    override fun getLikedSongs(): Flow<List<Track>> {
+        return trackDao.getLikedTracks().map { entities ->
+            entities.map { it.toDomain() }
+        }
+    }
+
+    override fun getLikedTrackIds(): Flow<Set<String>> {
+        return trackDao.getLikedTrackIds().map { it.toSet() }
+    }
+
+    override suspend fun toggleLike(track: Track): Boolean {
+        val existingEntity = trackDao.getTrackById(track.id)
+        val newLikedState = !(existingEntity?.isLiked ?: false)
+        setLikedInternal(track, existingEntity, newLikedState)
+        return newLikedState
+    }
+
+    override suspend fun setLiked(track: Track, liked: Boolean) {
+        val existingEntity = trackDao.getTrackById(track.id)
+        setLikedInternal(track, existingEntity, liked)
+    }
+
+    private suspend fun setLikedInternal(
+        track: Track,
+        existingEntity: com.suspended.app.data.local.entity.TrackEntity?,
+        liked: Boolean
+    ) {
+        val timestamp = if (liked) System.currentTimeMillis() else null
+        if (existingEntity != null) {
+            trackDao.setLiked(track.id, liked, timestamp)
+        } else {
+            // Track isn't cached locally yet (e.g. a fresh search result) - persist it first.
+            trackDao.insertTrack(track.toEntity(isLiked = liked, likedAt = timestamp))
+        }
+    }
 }

@@ -12,5 +12,6 @@ data class Track(
     val streamUrl: String? = null,
     val localPath: String? = null,
     val isDownloaded: Boolean = false,
+    val isLiked: Boolean = false,
     val addedAt: Long = System.currentTimeMillis()
 )

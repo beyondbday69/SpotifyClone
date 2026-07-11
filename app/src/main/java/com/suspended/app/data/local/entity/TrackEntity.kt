@@ -18,5 +18,7 @@ data class TrackEntity(
     val isDownloaded: Boolean = false,
     val isInLibrary: Boolean = false,
     val lastPlayedAt: Long? = null,
+    val isLiked: Boolean = false,
+    val likedAt: Long? = null,
     val addedAt: Long = System.currentTimeMillis()
 )

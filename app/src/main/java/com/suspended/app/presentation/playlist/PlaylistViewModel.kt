@@ -5,7 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.suspended.app.domain.model.Playlist
 import com.suspended.app.domain.model.Track
+import com.suspended.app.domain.repository.MusicRepository
 import com.suspended.app.domain.usecase.ManagePlaylistUseCase
+import com.suspended.app.domain.usecase.ToggleLikeUseCase
 import com.suspended.app.playback.PlaybackController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,13 +20,16 @@ import javax.inject.Inject
 data class PlaylistDetailUiState(
     val playlist: Playlist? = null,
     val isLoading: Boolean = true,
-    val currentPlayingTrackId: String? = null
+    val currentPlayingTrackId: String? = null,
+    val likedTrackIds: Set<String> = emptySet()
 )
 
 @HiltViewModel
 class PlaylistViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val managePlaylistUseCase: ManagePlaylistUseCase,
+    private val musicRepository: MusicRepository,
+    private val toggleLikeUseCase: ToggleLikeUseCase,
     private val playbackController: PlaybackController
 ) : ViewModel() {
 
@@ -42,6 +47,12 @@ class PlaylistViewModel @Inject constructor(
         viewModelScope.launch {
             playbackController.currentTrack.collect { track ->
                 _uiState.update { it.copy(currentPlayingTrackId = track?.id) }
+            }
+        }
+
+        viewModelScope.launch {
+            musicRepository.getLikedTrackIds().collect { ids ->
+                _uiState.update { it.copy(likedTrackIds = ids) }
             }
         }
     }
@@ -77,5 +88,11 @@ class PlaylistViewModel @Inject constructor(
 
     fun addToQueue(track: Track) {
         playbackController.addToQueue(track)
+    }
+
+    fun toggleLike(track: Track) {
+        viewModelScope.launch {
+            toggleLikeUseCase(track)
+        }
     }
 }

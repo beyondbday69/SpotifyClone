@@ -7,6 +7,7 @@ import com.suspended.app.domain.model.Playlist
 import com.suspended.app.domain.model.Track
 import com.suspended.app.domain.usecase.GetLibraryUseCase
 import com.suspended.app.domain.usecase.ManagePlaylistUseCase
+import com.suspended.app.domain.usecase.ToggleLikeUseCase
 import com.suspended.app.playback.PlaybackController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +17,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-enum class LibraryFilter { PLAYLISTS, TRACKS, ARTISTS, DOWNLOADED }
+enum class LibraryFilter { PLAYLISTS, TRACKS, ARTISTS, DOWNLOADED, LIKED }
 
 data class LibraryUiState(
     val selectedFilter: LibraryFilter = LibraryFilter.PLAYLISTS,
@@ -24,13 +25,17 @@ data class LibraryUiState(
     val tracks: List<Track> = emptyList(),
     val artists: List<Artist> = emptyList(),
     val downloadedTracks: List<Track> = emptyList(),
+    val likedSongs: List<Track> = emptyList(),
     val showCreatePlaylistDialog: Boolean = false
-)
+) {
+    val likedTrackIds: Set<String> get() = likedSongs.map { it.id }.toSet()
+}
 
 @HiltViewModel
 class LibraryViewModel @Inject constructor(
     private val getLibraryUseCase: GetLibraryUseCase,
     private val managePlaylistUseCase: ManagePlaylistUseCase,
+    private val toggleLikeUseCase: ToggleLikeUseCase,
     private val playbackController: PlaybackController
 ) : ViewModel() {
 
@@ -63,6 +68,11 @@ class LibraryViewModel @Inject constructor(
                 _uiState.update { it.copy(downloadedTracks = list) }
             }
         }
+        viewModelScope.launch {
+            libraryData.liked.collect { list ->
+                _uiState.update { it.copy(likedSongs = list) }
+            }
+        }
     }
 
     fun setFilter(filter: LibraryFilter) {
@@ -84,8 +94,15 @@ class LibraryViewModel @Inject constructor(
         val queue = when (_uiState.value.selectedFilter) {
             LibraryFilter.TRACKS -> _uiState.value.tracks
             LibraryFilter.DOWNLOADED -> _uiState.value.downloadedTracks
+            LibraryFilter.LIKED -> _uiState.value.likedSongs
             else -> listOf(track)
         }
         playbackController.play(track, queue)
+    }
+
+    fun toggleLike(track: Track) {
+        viewModelScope.launch {
+            toggleLikeUseCase(track)
+        }
     }
 }

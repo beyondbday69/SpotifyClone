@@ -20,13 +20,16 @@ fun TrackEntity.toDomain(): Track {
         streamUrl = null,
         localPath = localPath,
         isDownloaded = isDownloaded,
+        isLiked = isLiked,
         addedAt = addedAt
     )
 }
 
 fun Track.toEntity(
     isInLibrary: Boolean = false,
-    lastPlayedAt: Long? = null
+    lastPlayedAt: Long? = null,
+    isLiked: Boolean = this.isLiked,
+    likedAt: Long? = null
 ): TrackEntity {
     return TrackEntity(
         id = id,
@@ -41,6 +44,8 @@ fun Track.toEntity(
         isDownloaded = isDownloaded,
         isInLibrary = isInLibrary,
         lastPlayedAt = lastPlayedAt,
+        isLiked = isLiked,
+        likedAt = likedAt,
         addedAt = addedAt
     )
 }

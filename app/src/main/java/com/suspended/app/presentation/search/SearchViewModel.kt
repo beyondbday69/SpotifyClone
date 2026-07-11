@@ -3,7 +3,9 @@ package com.suspended.app.presentation.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.suspended.app.domain.model.Track
+import com.suspended.app.domain.repository.MusicRepository
 import com.suspended.app.domain.usecase.SearchTracksUseCase
+import com.suspended.app.domain.usecase.ToggleLikeUseCase
 import com.suspended.app.playback.PlaybackController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -20,12 +22,15 @@ data class SearchUiState(
     val results: List<Track> = emptyList(),
     val isSearching: Boolean = false,
     val error: String? = null,
-    val isActive: Boolean = false
+    val isActive: Boolean = false,
+    val likedTrackIds: Set<String> = emptySet()
 )
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
     private val searchTracksUseCase: SearchTracksUseCase,
+    private val musicRepository: MusicRepository,
+    private val toggleLikeUseCase: ToggleLikeUseCase,
     private val playbackController: PlaybackController
 ) : ViewModel() {
 
@@ -33,6 +38,14 @@ class SearchViewModel @Inject constructor(
     val uiState: StateFlow<SearchUiState> = _uiState.asStateFlow()
 
     private var searchJob: Job? = null
+
+    init {
+        viewModelScope.launch {
+            musicRepository.getLikedTrackIds().collect { ids ->
+                _uiState.update { it.copy(likedTrackIds = ids) }
+            }
+        }
+    }
 
     fun onQueryChange(query: String) {
         _uiState.update { it.copy(query = query) }
@@ -57,5 +70,11 @@ class SearchViewModel @Inject constructor(
 
     fun playTrack(track: Track) {
         playbackController.play(track, _uiState.value.results)
+    }
+
+    fun toggleLike(track: Track) {
+        viewModelScope.launch {
+            toggleLikeUseCase(track)
+        }
     }
 }

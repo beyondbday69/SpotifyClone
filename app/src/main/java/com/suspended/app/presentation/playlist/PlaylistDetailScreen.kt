@@ -124,6 +124,8 @@ fun PlaylistDetailScreen(
                     track = track,
                     trackNumber = index + 1,
                     isPlaying = state.currentPlayingTrackId == track.id,
+                    isLiked = state.likedTrackIds.contains(track.id),
+                    onLikeClick = { viewModel.toggleLike(track) },
                     onClick = { viewModel.playTrack(track) },
                     trailingContent = {
                         Text(

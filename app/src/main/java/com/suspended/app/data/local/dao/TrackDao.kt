@@ -48,4 +48,16 @@ interface TrackDao {
 
     @Query("SELECT EXISTS(SELECT 1 FROM tracks WHERE id = :trackId AND isDownloaded = 1)")
     suspend fun isDownloaded(trackId: String): Boolean
+
+    @Query("SELECT * FROM tracks WHERE isLiked = 1 ORDER BY likedAt DESC")
+    fun getLikedTracks(): Flow<List<TrackEntity>>
+
+    @Query("SELECT id FROM tracks WHERE isLiked = 1")
+    fun getLikedTrackIds(): Flow<List<String>>
+
+    @Query("UPDATE tracks SET isLiked = :liked, likedAt = :timestamp WHERE id = :trackId")
+    suspend fun setLiked(trackId: String, liked: Boolean, timestamp: Long?)
+
+    @Query("SELECT isLiked FROM tracks WHERE id = :trackId")
+    suspend fun isLiked(trackId: String): Boolean?
 }
