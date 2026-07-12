@@ -246,9 +246,11 @@ fun NowPlayingScreen(
     }
 }
 
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 private fun NowPlayingProgressSlider(
     progress: Float,
+
     currentPosition: Long,
     duration: Long,
     onSeek: (Float) -> Unit,
