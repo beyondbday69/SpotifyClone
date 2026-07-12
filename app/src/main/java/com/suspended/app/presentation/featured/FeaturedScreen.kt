@@ -56,7 +56,7 @@ fun FeaturedScreen(
         FeaturedPlaylist(1, "Discover Weekly", "https://i.scdn.co/image/ab67706f000000027ea4d505212b9de1f72c5112", "Your weekly mixtape of fresh music"),
         FeaturedPlaylist(2, "Release Radar", "https://i.scdn.co/image/ab67706f000000027ea4d505212b9de1f72c5112", "Catch all the latest music from artists you follow"),
         FeaturedPlaylist(3, "Daily Mix 1", "https://i.scdn.co/image/ab67706f000000027ea4d505212b9de1f72c5112", "Radiohead, Tame Impala, The Strokes and more"),
-        FeaturedPlaylist(4, "Daily Mix 2", "https://i.scdn.co/image/ab67706f000000027ea4d505212b9de1f72c5112", "Arctic Monbits, The Black Keys, Cage the Elephant"),
+        FeaturedPlaylist(4, "Daily Mix 2", "https://i.scdn.co/image/ab67706f000000027ea4d505212b9de1f72c5112", "Arctic Monkeys, The Black Keys, Cage the Elephant"),
         FeaturedPlaylist(5, "Chill Hits", "https://i.scdn.co/image/ab67706f000000027ea4d505212b9de1f72c5112", "Kick back to the best new and recent chill hits"),
         FeaturedPlaylist(6, "Deep Focus", "https://i.scdn.co/image/ab67706f000000027ea4d505212b9de1f72c5112", "Keep calm and focus with ambient and post-rock music")
     )
@@ -87,7 +87,7 @@ fun FeaturedScreen(
                     )
                 } else {
                     // Reverse transform: scale down + fade out
-                    slideInVertically(
+                    (slideInVertically(
                         initialOffsetY = { -it / 3 },
                         animationSpec = spring(
                             dampingRatio = Spring.DampingRatioLowBouncy,
@@ -119,11 +119,11 @@ fun FeaturedScreen(
                 ) {
                     // Top app bar
                     TopAppBar(
-                        title = { 
+                        title = {
                             Text(
                                 "Featured Playlists",
                                 style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold)
-                            ) 
+                            )
                         },
                         navigationIcon = {
                             IconButton(onClick = onNavigateBack) {
