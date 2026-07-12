@@ -20,16 +20,15 @@ import androidx.compose.material.icons.rounded.Shuffle
 import androidx.compose.material.icons.rounded.SkipNext
 import androidx.compose.material.icons.rounded.SkipPrevious
 import androidx.compose.material.icons.rounded.VolumeUp
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.WavyProgressIndicatorDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -208,7 +207,8 @@ fun NowPlayingScreen(
                 progress = progress,
                 currentPosition = currentPosition,
                 duration = duration,
-                onSeek = { viewModel.seekTo(it) }
+                onSeek = { viewModel.seekTo(it) },
+                isPlaying = isPlaying
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -294,13 +294,14 @@ fun NowPlayingScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun NowPlayingProgressSlider(
     progress: Float,
     currentPosition: Long,
     duration: Long,
     onSeek: (Float) -> Unit,
+    isPlaying: Boolean,
     modifier: Modifier = Modifier
 ) {
     var isDragging by remember { mutableStateOf(false) }
@@ -308,56 +309,55 @@ private fun NowPlayingProgressSlider(
 
     val displayProgress = if (isDragging) dragProgress else progress
 
-    // Bouncy thumb scale when dragging
-    val thumbScale by animateFloatAsState(
-        targetValue = if (isDragging) 1.3f else 1.0f,
+    // Animated progress for smooth wavy animation
+    val animatedProgress by animateFloatAsState(
+        targetValue = displayProgress,
         animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessHigh
+            dampingRatio = Spring.DampingRatioNoBouncy,
+            stiffness = Spring.StiffnessLow
         )
     )
 
     Column(modifier = modifier.fillMaxWidth()) {
-        Slider(
-            value = displayProgress,
-            onValueChange = {
-                isDragging = true
-                dragProgress = it
-            },
-            onValueChangeFinished = {
-                isDragging = false
-                onSeek(dragProgress)
-            },
-            colors = SliderDefaults.colors(
-                thumbColor = NowPlayingAccentGreen,
-                activeTrackColor = NowPlayingAccentGreen,
-                inactiveTrackColor = NowPlayingTrackBackground
-            ),
-            track = { sliderState ->
-                SliderDefaults.Track(
-                    sliderState = sliderState,
-                    colors = SliderDefaults.colors(
-                        activeTrackColor = NowPlayingAccentGreen,
-                        inactiveTrackColor = NowPlayingTrackBackground
-                    ),
-                    modifier = Modifier.height(8.dp) // Thick slider track
-                )
-            },
-            thumb = {
-                // Custom bouncy thumb
-                Box(
-                    modifier = Modifier
-                        .size(20.dp)
-                        .graphicsLayer {
-                            scaleX = thumbScale
-                            scaleY = thumbScale
+        // Wavy progress indicator from Material 3 Expressive
+        LinearWavyProgressIndicator(
+            progress = { animatedProgress },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(24.dp)
+                .pointerInput(Unit) {
+                    detectTapGestures { offset ->
+                        val fraction = (offset.x / size.width).coerceIn(0f, 1f)
+                        onSeek(fraction)
+                    }
+                }
+                .pointerInput(Unit) {
+                    detectHorizontalDragGestures(
+                        onDragStart = { offset ->
+                            isDragging = true
+                            dragProgress = (offset.x / size.width).coerceIn(0f, 1f)
+                        },
+                        onDrag = { change, _ ->
+                            change.consume()
+                            dragProgress = (change.position.x / size.width).coerceIn(0f, 1f)
+                        },
+                        onDragEnd = {
+                            isDragging = false
+                            onSeek(dragProgress)
+                        },
+                        onDragCancel = {
+                            isDragging = false
                         }
-                        .clip(CircleShape)
-                        .background(NowPlayingAccentGreen)
-                )
-            },
-            modifier = Modifier.fillMaxWidth()
+                    )
+                },
+            color = NowPlayingAccentGreen,
+            trackColor = NowPlayingTrackBackground,
+            amplitude = { WavyProgressIndicatorDefaults.Amplitude },
+            wavelength = { WavyProgressIndicatorDefaults.Wavelength },
+            waveSpeed = if (isPlaying) WavyProgressIndicatorDefaults.WaveSpeed else 0f
         )
+
+        Spacer(modifier = Modifier.height(8.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
