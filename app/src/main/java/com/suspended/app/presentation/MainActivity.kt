@@ -62,15 +62,16 @@ import com.suspended.app.playback.PlaybackController
 import com.suspended.app.playback.PlaybackService
 import com.suspended.app.presentation.components.MiniPlayer
 import com.suspended.app.presentation.navigation.AppNavigation
-import com.suspended.app.presentation.navigation.ExpoOutEasing
-import com.suspended.app.presentation.navigation.PLAYER_TRANSITION_MS
 import com.suspended.app.presentation.navigation.Screen
 import com.suspended.app.presentation.player.PlayerViewModel
 import com.suspended.app.presentation.theme.SpotifyBlack
 import com.suspended.app.presentation.theme.SpotifyGreen
 import com.suspended.app.presentation.theme.SuspendedTheme
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+
 
 data class BottomNavItem(
     val label: String,
@@ -119,10 +120,19 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun MainScreen() {
     val navController = rememberNavController()
     val playerViewModel: PlayerViewModel = hiltViewModel()
+
+    // Same Material 3 motion tokens driving AppNavigation's Now Playing
+    // slide, so the mini-player's collapse/expand stays in sync with the
+    // big player's slide-up/slide-down.
+    val miniPlayerSpatialSpec = MaterialTheme.motionScheme.defaultSpatialSpec<Float>()
+    val miniPlayerEffectsSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
+
+
 
     val currentTrack by playerViewModel.currentTrack.collectAsStateWithLifecycle()
     val isPlaying by playerViewModel.isPlaying.collectAsStateWithLifecycle()
@@ -234,17 +244,18 @@ private fun MainScreen() {
                         visible = currentTrack != null && currentRoute != Screen.NowPlaying.route,
                         enter = scaleIn(
                             initialScale = 0.9f,
-                            animationSpec = tween(PLAYER_TRANSITION_MS, easing = ExpoOutEasing)
+                            animationSpec = miniPlayerSpatialSpec
                         ) + fadeIn(
-                            animationSpec = tween(PLAYER_TRANSITION_MS, easing = ExpoOutEasing)
+                            animationSpec = miniPlayerEffectsSpec
                         ),
                         exit = scaleOut(
                             targetScale = 0.9f,
-                            animationSpec = tween(PLAYER_TRANSITION_MS, easing = ExpoOutEasing)
+                            animationSpec = miniPlayerSpatialSpec
                         ) + fadeOut(
-                            animationSpec = tween(PLAYER_TRANSITION_MS, easing = ExpoOutEasing)
+                            animationSpec = miniPlayerEffectsSpec
                         )
                     ) {
+
                         MiniPlayer(
                             track = currentTrack,
                             isPlaying = isPlaying,

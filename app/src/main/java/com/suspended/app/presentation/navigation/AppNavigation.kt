@@ -1,15 +1,19 @@
 package com.suspended.app.presentation.navigation
 
-import androidx.compose.animation.core.CubicBezierEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.IntOffset
+
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -21,10 +25,6 @@ import com.suspended.app.presentation.player.NowPlayingScreen
 import com.suspended.app.presentation.playlist.PlaylistDetailScreen
 import com.suspended.app.presentation.search.SearchScreen
 
-// Matches CSS cubic-bezier(0.16, 1, 0.3, 1) "ease-out-expo" from ref design
-val ExpoOutEasing = CubicBezierEasing(0.16f, 1f, 0.3f, 1f)
-const val PLAYER_TRANSITION_MS = 500
-
 sealed class Screen(val route: String) {
     object Home : Screen("home")
     object Search : Screen("search")
@@ -35,27 +35,37 @@ sealed class Screen(val route: String) {
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AppNavigation(
     navController: NavHostController,
     paddingValues: PaddingValues,
     modifier: Modifier = Modifier
 ) {
+    // Material 3 (Expressive) motion tokens, pulled from the app's
+    // MotionScheme (see SuspendedTheme -> MotionScheme.expressive()).
+    // Captured here in a composable context and reused as closures inside
+    // the transition lambdas below, since those lambdas are not themselves
+    // @Composable.
+    val spatialSpec = MaterialTheme.motionScheme.defaultSpatialSpec<IntOffset>()
+    val effectsSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
+
     NavHost(
         navController = navController,
         startDestination = Screen.Home.route,
         modifier = modifier.padding(paddingValues),
+        // M3 "fade through" for top-level destination swaps (Home/Search/Library)
         enterTransition = {
-            fadeIn(animationSpec = tween(300))
+            fadeIn(animationSpec = effectsSpec)
         },
         exitTransition = {
-            fadeOut(animationSpec = tween(300))
+            fadeOut(animationSpec = effectsSpec)
         },
         popEnterTransition = {
-            fadeIn(animationSpec = tween(300))
+            fadeIn(animationSpec = effectsSpec)
         },
         popExitTransition = {
-            fadeOut(animationSpec = tween(300))
+            fadeOut(animationSpec = effectsSpec)
         }
     ) {
         composable(route = Screen.Home.route) {
@@ -83,39 +93,32 @@ fun AppNavigation(
 
         composable(
             route = Screen.NowPlaying.route,
-            // Slide-up + fade-in, expo-out 500ms — matches ref html #full-player enter
+            // Big Now Playing UI: M3 spatial slide-up on enter, slide-down on
+            // exit (and the same on pop), driven by the MotionScheme's
+            // spatial/effects specs rather than a hand-tuned easing curve.
             enterTransition = {
                 slideInVertically(
                     initialOffsetY = { fullHeight -> fullHeight },
-                    animationSpec = tween(durationMillis = PLAYER_TRANSITION_MS, easing = ExpoOutEasing)
-                ) + fadeIn(
-                    animationSpec = tween(durationMillis = PLAYER_TRANSITION_MS, easing = ExpoOutEasing)
-                )
+                    animationSpec = spatialSpec
+                ) + fadeIn(animationSpec = effectsSpec)
             },
-            // Slide-down + fade-out, expo-out 500ms — matches ref html #full-player exit
             exitTransition = {
                 slideOutVertically(
                     targetOffsetY = { fullHeight -> fullHeight },
-                    animationSpec = tween(durationMillis = PLAYER_TRANSITION_MS, easing = ExpoOutEasing)
-                ) + fadeOut(
-                    animationSpec = tween(durationMillis = PLAYER_TRANSITION_MS, easing = ExpoOutEasing)
-                )
+                    animationSpec = spatialSpec
+                ) + fadeOut(animationSpec = effectsSpec)
             },
             popEnterTransition = {
                 slideInVertically(
                     initialOffsetY = { fullHeight -> fullHeight },
-                    animationSpec = tween(durationMillis = PLAYER_TRANSITION_MS, easing = ExpoOutEasing)
-                ) + fadeIn(
-                    animationSpec = tween(durationMillis = PLAYER_TRANSITION_MS, easing = ExpoOutEasing)
-                )
+                    animationSpec = spatialSpec
+                ) + fadeIn(animationSpec = effectsSpec)
             },
             popExitTransition = {
                 slideOutVertically(
                     targetOffsetY = { fullHeight -> fullHeight },
-                    animationSpec = tween(durationMillis = PLAYER_TRANSITION_MS, easing = ExpoOutEasing)
-                ) + fadeOut(
-                    animationSpec = tween(durationMillis = PLAYER_TRANSITION_MS, easing = ExpoOutEasing)
-                )
+                    animationSpec = spatialSpec
+                ) + fadeOut(animationSpec = effectsSpec)
             }
         ) {
             NowPlayingScreen(
@@ -131,7 +134,32 @@ fun AppNavigation(
                 navArgument("playlistId") {
                     type = NavType.LongType
                 }
-            )
+            ),
+            // Drill-in / drill-out: M3 shared-axis-style horizontal slide.
+            enterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { fullWidth -> fullWidth },
+                    animationSpec = spatialSpec
+                ) + fadeIn(animationSpec = effectsSpec)
+            },
+            exitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { fullWidth -> -fullWidth / 4 },
+                    animationSpec = spatialSpec
+                ) + fadeOut(animationSpec = effectsSpec)
+            },
+            popEnterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { fullWidth -> -fullWidth / 4 },
+                    animationSpec = spatialSpec
+                ) + fadeIn(animationSpec = effectsSpec)
+            },
+            popExitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { fullWidth -> fullWidth },
+                    animationSpec = spatialSpec
+                ) + fadeOut(animationSpec = effectsSpec)
+            }
         ) {
             PlaylistDetailScreen(
                 onNavigateBack = {

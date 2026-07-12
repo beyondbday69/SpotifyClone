@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Spotify</string>
+    <string name="app_name">jotlify</string>
     <string name="search_hint">What do you want to listen to?</string>
     <string name="home">Home</string>
     <string name="search">Search</string>
