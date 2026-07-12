@@ -8,6 +8,8 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -26,6 +28,7 @@ import com.suspended.app.presentation.library.LibraryScreen
 import com.suspended.app.presentation.player.NowPlayingScreen
 import com.suspended.app.presentation.playlist.PlaylistDetailScreen
 import com.suspended.app.presentation.search.SearchScreen
+import com.suspended.app.presentation.featured.FeaturedScreen
 
 sealed class Screen(val route: String) {
     object Home : Screen("home")
@@ -35,6 +38,7 @@ sealed class Screen(val route: String) {
     object PlaylistDetail : Screen("playlist/{playlistId}") {
         fun createRoute(playlistId: Long) = "playlist/$playlistId"
     }
+    object Featured : Screen("featured")
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -90,6 +94,9 @@ fun AppNavigation(
                 },
                 onNavigateToNowPlaying = {
                     navController.navigate(Screen.NowPlaying.route)
+                },
+                onNavigateToFeatured = {
+                    navController.navigate(Screen.Featured.route)
                 }
             )
         }
@@ -201,6 +208,57 @@ fun AppNavigation(
             PlaylistDetailScreen(
                 onNavigateBack = {
                     navController.popBackStack()
+                }
+            )
+        }
+
+        // Featured Playlists screen with container transform animation
+        composable(
+            route = Screen.Featured.route,
+            // Container transform: scale up on enter, scale down on exit
+            enterTransition = {
+                scaleIn(
+                    initialScale = 0.85f,
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioLowBouncy,
+                        stiffness = Spring.StiffnessLow
+                    )
+                ) + fadeIn(animationSpec = effectsSpec)
+            },
+            exitTransition = {
+                scaleOut(
+                    targetScale = 0.85f,
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessMedium
+                    )
+                ) + fadeOut(animationSpec = effectsSpec)
+            },
+            popEnterTransition = {
+                scaleIn(
+                    initialScale = 0.85f,
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioLowBouncy,
+                        stiffness = Spring.StiffnessLow
+                    )
+                ) + fadeIn(animationSpec = effectsSpec)
+            },
+            popExitTransition = {
+                scaleOut(
+                    targetScale = 0.85f,
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessMedium
+                    )
+                ) + fadeOut(animationSpec = effectsSpec)
+            }
+        ) {
+            FeaturedScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onPlaylistClick = { playlistId ->
+                    navController.navigate(Screen.PlaylistDetail.createRoute(playlistId))
                 }
             )
         }

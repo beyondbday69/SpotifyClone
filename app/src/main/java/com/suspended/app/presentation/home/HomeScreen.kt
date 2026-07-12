@@ -1,5 +1,6 @@
 package com.suspended.app.presentation.home
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -24,16 +25,16 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.suspended.app.presentation.components.ShelfItem
 import com.suspended.app.presentation.components.ShelfSection
-import com.suspended.app.presentation.components.TrackListItem
 import com.suspended.app.presentation.theme.SpotifyBlack
 import com.suspended.app.presentation.theme.SpotifyWhite
 import coil3.compose.AsyncImage
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun HomeScreen(
     onNavigateToPlaylist: (Long) -> Unit,
     onNavigateToNowPlaying: () -> Unit,
+    onNavigateToFeatured: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -93,8 +94,8 @@ fun HomeScreen(
                     )
                     FilterChip(
                         selected = false,
-                        onClick = { },
-                        label = { Text("Podcasts") },
+                        onClick = onNavigateToFeatured,
+                        label = { Text("Featured") },
                         colors = FilterChipDefaults.filterChipColors(
                             containerColor = MaterialTheme.colorScheme.surfaceVariant,
                             labelColor = SpotifyWhite
