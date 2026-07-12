@@ -201,6 +201,7 @@ private fun PlaylistGridItem(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PlaylistDetailView(
     playlist: FeaturedPlaylist,
@@ -233,7 +234,6 @@ private fun PlaylistDetailView(
                 navigationIconContentColor = SpotifyWhite
             )
         )
-
         // Large playlist image
         AsyncImage(
             model = playlist.coverUrl,
