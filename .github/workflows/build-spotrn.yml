@@ -1,0 +1,50 @@
+name: Build SuspendedRN Android APK
+
+on:
+  push:
+    branches: [ spotrn ]
+  pull_request:
+    branches: [ spotrn ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Set up Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: SuspendedRN/package-lock.json
+
+      - name: Install npm dependencies
+        working-directory: SuspendedRN
+        run: npm install
+
+      - name: Grant execute permission for gradlew
+        working-directory: SuspendedRN/android
+        run: chmod +x gradlew
+
+      - name: Build debug APK (with Chaquopy + yt-dlp)
+        working-directory: SuspendedRN/android
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: suspendedrn-debug
+          path: SuspendedRN/android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 7
