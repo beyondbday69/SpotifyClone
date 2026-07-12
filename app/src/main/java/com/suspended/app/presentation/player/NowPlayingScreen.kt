@@ -80,7 +80,6 @@ private val snappySpring = spring<Float>(
 )
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun NowPlayingScreen(
     onNavigateBack: () -> Unit,
