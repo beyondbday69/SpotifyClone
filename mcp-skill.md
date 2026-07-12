@@ -41,3 +41,15 @@ Before reading *any* file, use the **`search_spotify_code`** tool to find exactl
 ## 10. Using `check_github_actions`
 * **Usage**: Provide an optional `runId`. If you omit it, you will see a list of the 5 most recent GitHub Actions workflow runs (with their IDs and statuses). If you provide a `runId`, you will see the detailed failure logs for that specific run.
 * **Best Practice**: After pushing code, use this tool (without arguments) to check if your CI/CD tests passed. If a run failed, use the tool again with the `runId` to see exactly which test failed.
+
+## 11. Creating and Deleting Files
+* **Usage**: Use `create_spotify_file` to create a brand new file with the specified content. Use `delete_spotify_file` to delete an existing file.
+* **Best Practice**: Never use `edit_spotify_file` or `replace_lines_spotify` on a file that doesn't exist yet. Always use `create_spotify_file` first.
+
+## 12. Using Persistent Memory (CRITICAL FOR CONTINUATION)
+* **Usage**: Use `read_memory` to read the global `mcp-memory.md` file. Use `write_memory` to overwrite it with new content.
+* **Best Practice**: Because you may hit token limits and need to start a new chat, you must **always leave notes for yourself** using `write_memory` before you stop working. Whenever you start a new conversation, **immediately call `read_memory`** so you can pick up exactly where you left off!
+
+## 13. Running Terminal Commands
+* **Usage**: Use `run_bash_command` to execute terminal commands on the VPS directly.
+* **Best Practice**: Use this when you need to install packages, run tests, debug things, or interact with git. Remember the command will run in the root of the SpotifyClone directory by default.
