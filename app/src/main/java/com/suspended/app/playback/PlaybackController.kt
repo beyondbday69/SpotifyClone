@@ -66,6 +66,10 @@ class PlaybackController @Inject constructor(
     private val _repeatMode = MutableStateFlow(RepeatMode.OFF)
     val repeatMode: StateFlow<RepeatMode> = _repeatMode.asStateFlow()
 
+    private val _volume = MutableStateFlow(1f)
+    val volume: StateFlow<Float> = _volume.asStateFlow()
+
+
     // Callback for when a new track needs its stream URL resolved
     var onTrackNeedsResolve: (suspend (Track) -> String?)? = null
     
@@ -213,6 +217,13 @@ class PlaybackController @Inject constructor(
             RepeatMode.ALL -> Player.REPEAT_MODE_ALL
         }
     }
+
+    fun setVolume(value: Float) {
+        val clamped = value.coerceIn(0f, 1f)
+        _volume.value = clamped
+        exoPlayer.volume = clamped
+    }
+
     
     fun clearError() {
         if (_playbackState.value == PlaybackState.ERROR) {

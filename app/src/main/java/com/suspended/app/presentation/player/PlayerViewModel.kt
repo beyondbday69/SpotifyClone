@@ -31,6 +31,8 @@ class PlayerViewModel @Inject constructor(
     val currentPosition: StateFlow<Long> = playbackController.currentPosition
     val isShuffled: StateFlow<Boolean> = playbackController.isShuffled
     val repeatMode: StateFlow<RepeatMode> = playbackController.repeatMode
+    val volume: StateFlow<Float> = playbackController.volume
+
     val queue: StateFlow<List<Track>> = playbackController.queueManager.queue
     val playbackState = playbackController.playbackState
     val errorMessage = playbackController.errorMessage
@@ -72,6 +74,11 @@ class PlayerViewModel @Inject constructor(
     fun toggleRepeat() {
         playbackController.toggleRepeat()
     }
+
+    fun setVolume(value: Float) {
+        playbackController.setVolume(value)
+    }
+
 
     fun toggleLike(track: Track) {
         viewModelScope.launch {
