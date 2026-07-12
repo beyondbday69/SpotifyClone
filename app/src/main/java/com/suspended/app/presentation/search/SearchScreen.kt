@@ -1,6 +1,5 @@
 package com.suspended.app.presentation.search
 
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -35,6 +34,12 @@ fun SearchScreen(
     val isPlaying by playerViewModel.isPlaying.collectAsStateWithLifecycle()
 
     var active by remember { mutableStateOf(false) }
+
+    // Same M3 motion tokens used across the rest of the app (AppNavigation,
+    // MiniPlayer, TrackListItem) rather than a bare spring(), so new results
+    // fading/sliding into place feels consistent with everything else.
+    val resultFadeSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
+    val resultPlacementSpec = MaterialTheme.motionScheme.defaultSpatialSpec<androidx.compose.ui.unit.IntOffset>()
 
     val categories = listOf(
         "Pop" to listOf(Color(0xFFFF4081), Color(0xFFFF80AB)),
@@ -105,8 +110,8 @@ fun SearchScreen(
                             onLikeClick = { viewModel.toggleLike(track) },
                             onClick = { viewModel.playTrack(track) },
                             modifier = Modifier.animateItem(
-                                fadeInSpec = spring(),
-                                placementSpec = spring()
+                                fadeInSpec = resultFadeSpec,
+                                placementSpec = resultPlacementSpec
                             )
                         )
                     }

@@ -2,6 +2,7 @@ package com.suspended.app.presentation.player
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.Spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
@@ -19,6 +20,7 @@ import androidx.compose.material.icons.rounded.Shuffle
 import androidx.compose.material.icons.rounded.SkipNext
 import androidx.compose.material.icons.rounded.SkipPrevious
 import androidx.compose.material.icons.rounded.VolumeUp
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -51,16 +53,33 @@ import com.suspended.app.playback.RepeatMode
 import com.suspended.app.presentation.components.formatMillis
 
 
-// Colors matching the "Now playing" reference design exactly — a light,
-// flat surface rather than the app's usual dark theme. Scoped to this
-// screen only.
-private val NowPlayingBackground = Color(0xFFE7ECEF)
-private val NowPlayingAccentTeal = Color(0xFF1C7C94)
-private val NowPlayingPlayButtonNavy = Color(0xFF123C4A)
-private val NowPlayingTextPrimary = Color(0xFF1A1C1E)
-private val NowPlayingTextSecondary = Color(0xFF5F6368)
-private val NowPlayingTrackLight = Color(0xFFD7E0E3)
+// Dark theme colors for Now Playing - bouncy motion physics
+private val NowPlayingBackground = Color(0xFF0D0D0D)
+private val NowPlayingSurface = Color(0xFF181818)
+private val NowPlayingAccentGreen = Color(0xFF1DB954)
+private val NowPlayingPlayButton = Color(0xFF1DB954)
+private val NowPlayingTextPrimary = Color(0xFFFFFFFF)
+private val NowPlayingTextSecondary = Color(0xFFB3B3B3)
+private val NowPlayingTrackBackground = Color(0xFF282828)
+private val NowPlayingTrackActive = Color(0xFF1DB954)
 
+// Bouncy spring animation specs for smooth, lively transitions
+private val bouncySpring = spring<Float>(
+    dampingRatio = Spring.DampingRatioMediumBouncy,
+    stiffness = Spring.StiffnessLow
+)
+
+private val smoothSpring = spring<Float>(
+    dampingRatio = Spring.DampingRatioLowBouncy,
+    stiffness = Spring.StiffnessMedium
+)
+
+private val snappySpring = spring<Float>(
+    dampingRatio = Spring.DampingRatioNoBouncy,
+    stiffness = Spring.StiffnessHigh
+)
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun NowPlayingScreen(
@@ -82,9 +101,31 @@ fun NowPlayingScreen(
         return
     }
 
+    // Bouncy album scale animation - pulses with music
     val albumScale by animateFloatAsState(
-        targetValue = if (isPlaying) 1.0f else 0.94f,
-        animationSpec = spring(dampingRatio = 0.6f, stiffness = 400f)
+        targetValue = if (isPlaying) 1.0f else 0.92f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        )
+    )
+
+    // Play button bouncy scale
+    val playButtonScale by animateFloatAsState(
+        targetValue = if (isPlaying) 1.0f else 0.9f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessMedium
+        )
+    )
+
+    // Album rotation for fun bouncy effect
+    val albumRotation by animateFloatAsState(
+        targetValue = if (isPlaying) 0f else -2f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioLowBouncy,
+            stiffness = Spring.StiffnessVeryLow
+        )
     )
 
     Box(
@@ -119,6 +160,7 @@ fun NowPlayingScreen(
 
             Spacer(modifier = Modifier.weight(1f))
 
+            // Album cover with bouncy animation
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -126,9 +168,10 @@ fun NowPlayingScreen(
                     .graphicsLayer {
                         scaleX = albumScale
                         scaleY = albumScale
+                        rotationZ = albumRotation
                     }
                     .clip(RoundedCornerShape(28.dp))
-                    .background(NowPlayingAccentTeal)
+                    .background(NowPlayingSurface)
             ) {
                 AsyncImage(
                     model = track?.thumbnailUrl?.replace("hqdefault.jpg", "maxresdefault.jpg")?.replace(Regex("=w\\d+-h\\d+.*"), "=w1080-h1080"),
@@ -180,7 +223,7 @@ fun NowPlayingScreen(
                     Icon(
                         Icons.Rounded.Shuffle,
                         contentDescription = "Shuffle",
-                        tint = NowPlayingAccentTeal,
+                        tint = NowPlayingAccentGreen,
                         modifier = Modifier.size(24.dp)
                     )
                 }
@@ -188,23 +231,29 @@ fun NowPlayingScreen(
                     Icon(
                         Icons.Rounded.SkipPrevious,
                         contentDescription = "Previous",
-                        tint = NowPlayingAccentTeal,
+                        tint = NowPlayingTextPrimary,
                         modifier = Modifier.size(32.dp)
                     )
                 }
 
+                // Bouncy play button
                 Surface(
                     onClick = { viewModel.playPause() },
                     shape = CircleShape,
-                    color = NowPlayingPlayButtonNavy,
-                    contentColor = Color.White,
-                    modifier = Modifier.size(76.dp)
+                    color = NowPlayingPlayButton,
+                    contentColor = Color.Black,
+                    modifier = Modifier
+                        .size(76.dp)
+                        .graphicsLayer {
+                            scaleX = playButtonScale
+                            scaleY = playButtonScale
+                        }
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         if (isLoading) {
                             LoadingIndicator(
                                 modifier = Modifier.size(28.dp),
-                                color = Color.White
+                                color = Color.Black
                             )
                         } else {
                             Icon(
@@ -220,7 +269,7 @@ fun NowPlayingScreen(
                     Icon(
                         Icons.Rounded.SkipNext,
                         contentDescription = "Next",
-                        tint = NowPlayingAccentTeal,
+                        tint = NowPlayingTextPrimary,
                         modifier = Modifier.size(32.dp)
                     )
                 }
@@ -228,7 +277,7 @@ fun NowPlayingScreen(
                     Icon(
                         imageVector = if (repeatMode == RepeatMode.ONE) Icons.Rounded.RepeatOne else Icons.Rounded.Repeat,
                         contentDescription = "Repeat",
-                        tint = NowPlayingAccentTeal,
+                        tint = NowPlayingAccentGreen,
                         modifier = Modifier.size(24.dp)
                     )
                 }
@@ -246,11 +295,10 @@ fun NowPlayingScreen(
     }
 }
 
-@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun NowPlayingProgressSlider(
     progress: Float,
-
     currentPosition: Long,
     duration: Long,
     onSeek: (Float) -> Unit,
@@ -260,6 +308,15 @@ private fun NowPlayingProgressSlider(
     var dragProgress by remember { mutableStateOf(0f) }
 
     val displayProgress = if (isDragging) dragProgress else progress
+
+    // Bouncy thumb scale when dragging
+    val thumbScale by animateFloatAsState(
+        targetValue = if (isDragging) 1.3f else 1.0f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessHigh
+        )
+    )
 
     Column(modifier = modifier.fillMaxWidth()) {
         Slider(
@@ -273,18 +330,31 @@ private fun NowPlayingProgressSlider(
                 onSeek(dragProgress)
             },
             colors = SliderDefaults.colors(
-                thumbColor = NowPlayingAccentTeal,
-                activeTrackColor = NowPlayingAccentTeal,
-                inactiveTrackColor = NowPlayingTrackLight
+                thumbColor = NowPlayingAccentGreen,
+                activeTrackColor = NowPlayingAccentGreen,
+                inactiveTrackColor = NowPlayingTrackBackground
             ),
             track = { sliderState ->
                 SliderDefaults.Track(
                     sliderState = sliderState,
                     colors = SliderDefaults.colors(
-                        activeTrackColor = NowPlayingAccentTeal,
-                        inactiveTrackColor = NowPlayingTrackLight
+                        activeTrackColor = NowPlayingAccentGreen,
+                        inactiveTrackColor = NowPlayingTrackBackground
                     ),
-                    modifier = Modifier.height(3.dp)
+                    modifier = Modifier.height(8.dp) // Thick slider track
+                )
+            },
+            thumb = {
+                // Custom bouncy thumb
+                Box(
+                    modifier = Modifier
+                        .size(20.dp)
+                        .graphicsLayer {
+                            scaleX = thumbScale
+                            scaleY = thumbScale
+                        }
+                        .clip(CircleShape)
+                        .background(NowPlayingAccentGreen)
                 )
             },
             modifier = Modifier.fillMaxWidth()
@@ -322,7 +392,7 @@ private fun NowPlayingVolumeBar(
             .fillMaxWidth()
             .height(56.dp)
             .clip(RoundedCornerShape(50))
-            .background(NowPlayingTrackLight)
+            .background(NowPlayingTrackBackground)
             .onSizeChanged { barWidthPx = it.width }
             .pointerInput(Unit) {
                 detectTapGestures { offset ->
@@ -344,13 +414,13 @@ private fun NowPlayingVolumeBar(
                 .fillMaxHeight()
                 .fillMaxWidth(fraction = volume.coerceIn(0.14f, 1f))
                 .clip(RoundedCornerShape(50))
-                .background(NowPlayingAccentTeal),
+                .background(NowPlayingAccentGreen),
             contentAlignment = Alignment.CenterEnd
         ) {
             Icon(
                 imageVector = Icons.Rounded.VolumeUp,
                 contentDescription = "Volume",
-                tint = Color.White,
+                tint = Color.Black,
                 modifier = Modifier.padding(end = 20.dp)
             )
         }

@@ -3,6 +3,8 @@ package com.suspended.app.presentation.components
 import androidx.compose.ui.unit.IntOffset
 import kotlin.math.roundToInt
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -23,9 +25,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.suspended.app.domain.model.Track
 import com.suspended.app.presentation.theme.SpotifyWhite
+import kotlinx.coroutines.launch
 import kotlin.math.abs
 
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -55,50 +57,65 @@ fun MiniPlayer(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // Bouncy spring animation for smooth slide-in/out
+    val slideSpec = spring<IntOffset>(
+        dampingRatio = Spring.DampingRatioMediumBouncy,
+        stiffness = Spring.StiffnessLow
+    )
+
     AnimatedVisibility(
         visible = track != null,
-        enter = slideInVertically(spring()) { it },
-        exit = slideOutVertically(spring()) { it }
+        enter = slideInVertically(slideSpec) { it },
+        exit = slideOutVertically(slideSpec) { it }
     ) {
         if (track != null) {
+
+            // Drag offset as an Animatable with bouncy spring back
+            val offsetX = remember { Animatable(0f) }
+            val offsetY = remember { Animatable(0f) }
+            val coroutineScope = rememberCoroutineScope()
             
-            var offsetX by remember { mutableStateOf(0f) }
-            var offsetY by remember { mutableStateOf(0f) }
+            // Bouncy spring for snap back
+            val snapBackSpec = spring<Float>(
+                dampingRatio = Spring.DampingRatioLowBouncy,
+                stiffness = Spring.StiffnessMedium
+            )
 
             Surface(
                 modifier = modifier
                     .fillMaxWidth(0.96f) // Slightly inset to float
                     .height(64.dp)
-                    .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
+                    .offset { IntOffset(offsetX.value.roundToInt(), offsetY.value.roundToInt()) }
                     .pointerInput(Unit) {
                         detectDragGestures(
                             onDragEnd = {
-                                if (offsetY > 100f) {
-                                    onDismiss()
-                                } else if (offsetX > 150f) {
-                                    onSkipPrevious()
-                                } else if (offsetX < -150f) {
-                                    onSkipNext()
+                                val endX = offsetX.value
+                                val endY = offsetY.value
+                                when {
+                                    endY > 100f -> onDismiss()
+                                    endX > 150f -> onSkipPrevious()
+                                    endX < -150f -> onSkipNext()
                                 }
-                                offsetX = 0f
-                                offsetY = 0f
+                                // Bouncy spring back to rest
+                                coroutineScope.launch { offsetX.animateTo(0f, snapBackSpec) }
+                                coroutineScope.launch { offsetY.animateTo(0f, snapBackSpec) }
                             },
                             onDrag = { change, dragAmount ->
                                 change.consume()
-                                if (abs(dragAmount.x) > abs(dragAmount.y)) {
-                                    offsetX += dragAmount.x * 0.5f // Damped translation
-                                } else {
-                                    if (dragAmount.y > 0) { // Only allow swiping down
-                                        offsetY += dragAmount.y * 0.5f
+                                coroutineScope.launch {
+                                    if (abs(dragAmount.x) > abs(dragAmount.y)) {
+                                        offsetX.snapTo(offsetX.value + dragAmount.x * 0.5f) // Damped translation
+                                    } else if (dragAmount.y > 0) { // Only allow swiping down
+                                        offsetY.snapTo(offsetY.value + dragAmount.y * 0.5f)
                                     }
                                 }
                             }
                         )
                     },
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(16.dp),
                 color = MaterialTheme.colorScheme.surfaceVariant,
-                tonalElevation = 2.dp,
-                shadowElevation = 8.dp,
+                tonalElevation = 4.dp,
+                shadowElevation = 12.dp,
                 onClick = onClick
             ) {
                 Row(
@@ -118,7 +135,7 @@ fun MiniPlayer(
                             modifier = Modifier.fillMaxSize(),
                             color = MaterialTheme.colorScheme.primary,
                             trackColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f),
-                            strokeWidth = 2.dp
+                            strokeWidth = 3.dp // Thicker progress ring
                         )
                         AsyncImage(
                             model = track.thumbnailUrl,

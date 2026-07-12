@@ -1,5 +1,7 @@
 package com.suspended.app.presentation.navigation
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -42,19 +44,32 @@ fun AppNavigation(
     paddingValues: PaddingValues,
     modifier: Modifier = Modifier
 ) {
-    // Material 3 (Expressive) motion tokens, pulled from the app's
-    // MotionScheme (see SuspendedTheme -> MotionScheme.expressive()).
-    // Captured here in a composable context and reused as closures inside
-    // the transition lambdas below, since those lambdas are not themselves
-    // @Composable.
-    val spatialSpec = MaterialTheme.motionScheme.defaultSpatialSpec<IntOffset>()
-    val effectsSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
+    // Bouncy spring animations for smooth, lively transitions
+    // These create that "bouncy" physics feel similar to iOS/macOS
+    
+    // Spatial transitions (position/size changes) - bouncy spring
+    val spatialSpec = spring<IntOffset>(
+        dampingRatio = Spring.DampingRatioMediumBouncy,
+        stiffness = Spring.StiffnessLow
+    )
+    
+    // Effects transitions (fade/appearance) - smooth spring
+    val effectsSpec = spring<Float>(
+        dampingRatio = Spring.DampingRatioLowBouncy,
+        stiffness = Spring.StiffnessMedium
+    )
+    
+    // Fast snappy transitions for quick interactions
+    val snappySpec = spring<Float>(
+        dampingRatio = Spring.DampingRatioNoBouncy,
+        stiffness = Spring.StiffnessHigh
+    )
 
     NavHost(
         navController = navController,
         startDestination = Screen.Home.route,
         modifier = modifier.padding(paddingValues),
-        // M3 "fade through" for top-level destination swaps (Home/Search/Library)
+        // M3 "fade through" with bouncy springs for top-level destination swaps
         enterTransition = {
             fadeIn(animationSpec = effectsSpec)
         },
@@ -93,31 +108,41 @@ fun AppNavigation(
 
         composable(
             route = Screen.NowPlaying.route,
-            // Big Now Playing UI: M3 spatial slide-up on enter, slide-down on
-            // exit (and the same on pop), driven by the MotionScheme's
-            // spatial/effects specs rather than a hand-tuned easing curve.
+            // Big Now Playing UI: bouncy slide-up on enter, slide-down on exit
             enterTransition = {
                 slideInVertically(
                     initialOffsetY = { fullHeight -> fullHeight },
-                    animationSpec = spatialSpec
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioLowBouncy,
+                        stiffness = Spring.StiffnessLow
+                    )
                 ) + fadeIn(animationSpec = effectsSpec)
             },
             exitTransition = {
                 slideOutVertically(
                     targetOffsetY = { fullHeight -> fullHeight },
-                    animationSpec = spatialSpec
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessMedium
+                    )
                 ) + fadeOut(animationSpec = effectsSpec)
             },
             popEnterTransition = {
                 slideInVertically(
                     initialOffsetY = { fullHeight -> fullHeight },
-                    animationSpec = spatialSpec
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioLowBouncy,
+                        stiffness = Spring.StiffnessLow
+                    )
                 ) + fadeIn(animationSpec = effectsSpec)
             },
             popExitTransition = {
                 slideOutVertically(
                     targetOffsetY = { fullHeight -> fullHeight },
-                    animationSpec = spatialSpec
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessMedium
+                    )
                 ) + fadeOut(animationSpec = effectsSpec)
             }
         ) {
@@ -135,29 +160,41 @@ fun AppNavigation(
                     type = NavType.LongType
                 }
             ),
-            // Drill-in / drill-out: M3 shared-axis-style horizontal slide.
+            // Drill-in / drill-out: bouncy horizontal slide
             enterTransition = {
                 slideInHorizontally(
                     initialOffsetX = { fullWidth -> fullWidth },
-                    animationSpec = spatialSpec
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioLowBouncy,
+                        stiffness = Spring.StiffnessLow
+                    )
                 ) + fadeIn(animationSpec = effectsSpec)
             },
             exitTransition = {
                 slideOutHorizontally(
                     targetOffsetX = { fullWidth -> -fullWidth / 4 },
-                    animationSpec = spatialSpec
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessMedium
+                    )
                 ) + fadeOut(animationSpec = effectsSpec)
             },
             popEnterTransition = {
                 slideInHorizontally(
                     initialOffsetX = { fullWidth -> -fullWidth / 4 },
-                    animationSpec = spatialSpec
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioLowBouncy,
+                        stiffness = Spring.StiffnessLow
+                    )
                 ) + fadeIn(animationSpec = effectsSpec)
             },
             popExitTransition = {
                 slideOutHorizontally(
                     targetOffsetX = { fullWidth -> fullWidth },
-                    animationSpec = spatialSpec
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessMedium
+                    )
                 ) + fadeOut(animationSpec = effectsSpec)
             }
         ) {

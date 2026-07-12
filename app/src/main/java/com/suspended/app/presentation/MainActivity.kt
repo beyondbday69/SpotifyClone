@@ -1,8 +1,5 @@
 package com.suspended.app.presentation
 
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.windowInsetsPadding
 import android.Manifest
 import android.content.Intent
 import android.os.Build
@@ -17,9 +14,8 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -31,7 +27,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -52,6 +51,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -126,13 +126,15 @@ private fun MainScreen() {
     val navController = rememberNavController()
     val playerViewModel: PlayerViewModel = hiltViewModel()
 
-    // Same Material 3 motion tokens driving AppNavigation's Now Playing
-    // slide, so the mini-player's collapse/expand stays in sync with the
-    // big player's slide-up/slide-down.
-    val miniPlayerSpatialSpec = MaterialTheme.motionScheme.defaultSpatialSpec<Float>()
-    val miniPlayerEffectsSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
-
-
+    // Bouncy spring animations for mini player
+    val miniPlayerSlideSpec = spring<Float>(
+        dampingRatio = Spring.DampingRatioMediumBouncy,
+        stiffness = Spring.StiffnessLow
+    )
+    val miniPlayerFadeSpec = spring<Float>(
+        dampingRatio = Spring.DampingRatioLowBouncy,
+        stiffness = Spring.StiffnessMedium
+    )
 
     val currentTrack by playerViewModel.currentTrack.collectAsStateWithLifecycle()
     val isPlaying by playerViewModel.isPlaying.collectAsStateWithLifecycle()
@@ -208,9 +210,14 @@ private fun MainScreen() {
                     val playerHeight = if (currentTrack != null && currentRoute != Screen.NowPlaying.route) 80.dp else 0.dp
                     
                     val targetBottomPadding = paddingValues.calculateBottomPadding() + toolbarHeight + playerHeight
+                    
+                    // Bouncy animated bottom padding
                     val animatedBottomPadding by androidx.compose.animation.core.animateDpAsState(
                         targetValue = targetBottomPadding,
-                        animationSpec = androidx.compose.animation.core.tween(350, easing = androidx.compose.animation.core.FastOutSlowInEasing),
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioLowBouncy,
+                            stiffness = Spring.StiffnessMedium
+                        ),
                         label = "bottomPadding"
                     )
 
@@ -232,27 +239,38 @@ private fun MainScreen() {
                 Column(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
-                        .windowInsetsPadding(androidx.compose.foundation.layout.WindowInsets.navigationBars)
+                        .windowInsetsPadding(WindowInsets.navigationBars)
                         .padding(bottom = 24.dp)
                         .padding(horizontal = 8.dp)
                         .zIndex(1f),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Mini bar just scales down + fades (no slide) as big player
-                    // slides/fades over it — matches ref html mini-player collapse.
+                    // Mini player with bouncy scale + fade animation
                     AnimatedVisibility(
                         visible = currentTrack != null && currentRoute != Screen.NowPlaying.route,
                         enter = scaleIn(
-                            initialScale = 0.9f,
-                            animationSpec = miniPlayerSpatialSpec
+                            initialScale = 0.85f,
+                            animationSpec = spring(
+                                dampingRatio = Spring.DampingRatioLowBouncy,
+                                stiffness = Spring.StiffnessLow
+                            )
                         ) + fadeIn(
-                            animationSpec = miniPlayerEffectsSpec
+                            animationSpec = spring(
+                                dampingRatio = Spring.DampingRatioNoBouncy,
+                                stiffness = Spring.StiffnessMedium
+                            )
                         ),
                         exit = scaleOut(
-                            targetScale = 0.9f,
-                            animationSpec = miniPlayerSpatialSpec
+                            targetScale = 0.85f,
+                            animationSpec = spring(
+                                dampingRatio = Spring.DampingRatioMediumBouncy,
+                                stiffness = Spring.StiffnessMedium
+                            )
                         ) + fadeOut(
-                            animationSpec = miniPlayerEffectsSpec
+                            animationSpec = spring(
+                                dampingRatio = Spring.DampingRatioNoBouncy,
+                                stiffness = Spring.StiffnessMedium
+                            )
                         )
                     ) {
 

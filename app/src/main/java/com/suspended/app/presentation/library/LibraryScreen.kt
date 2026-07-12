@@ -1,5 +1,9 @@
 package com.suspended.app.presentation.library
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,7 +25,7 @@ import com.suspended.app.presentation.theme.SpotifyBlack
 import com.suspended.app.presentation.theme.SpotifyWhite
 import com.suspended.app.presentation.components.ShelfItem
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun LibraryScreen(
     onNavigateToPlaylist: (Long) -> Unit,
@@ -30,6 +34,11 @@ fun LibraryScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     var showThemeSheet by remember { mutableStateOf(false) }
+
+    // M3 "fade through" (effects token) for the filter-tab body: whichever
+    // list is showing fades out, the newly selected one fades in, rather than
+    // the LazyColumn content just snapping to the new filter.
+    val filterEffectsSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
 
     Column(
         modifier = Modifier
@@ -98,81 +107,90 @@ fun LibraryScreen(
         }
 
 
-        LazyColumn(
-            contentPadding = PaddingValues(bottom = 120.dp)
-        ) {
-            when (state.selectedFilter) {
-                LibraryFilter.PLAYLISTS -> {
-                    items(state.playlists, key = { it.id }) { playlist ->
-                        TrackListItem(
-                            track = com.suspended.app.domain.model.Track(
-                                id = playlist.id.toString(),
-                                title = playlist.name,
-                                artist = "${playlist.tracks.size} tracks",
-                                thumbnailUrl = playlist.coverUrl
-                            ),
-                            onClick = { onNavigateToPlaylist(playlist.id) }
-                        )
-                    }
-                }
-                LibraryFilter.TRACKS -> {
-                    items(state.tracks, key = { it.id }) { track ->
-                        TrackListItem(
-                            track = track,
-                            isLiked = state.likedTrackIds.contains(track.id),
-                            onLikeClick = { viewModel.toggleLike(track) },
-                            onClick = { viewModel.playTrack(track) }
-                        )
-                    }
-                }
-                LibraryFilter.ARTISTS -> {
-                    items(state.artists, key = { it.id }) { artist ->
-                        TrackListItem(
-                            track = com.suspended.app.domain.model.Track(
-                                id = artist.id,
-                                title = artist.name,
-                                artist = "${artist.trackCount} tracks",
-                                thumbnailUrl = artist.thumbnailUrl
-                            ),
-                            onClick = { }
-                        )
-                    }
-                }
-                LibraryFilter.DOWNLOADED -> {
-                    items(state.downloadedTracks, key = { it.id }) { track ->
-                        TrackListItem(
-                            track = track,
-                            isLiked = state.likedTrackIds.contains(track.id),
-                            onLikeClick = { viewModel.toggleLike(track) },
-                            onClick = { viewModel.playTrack(track) }
-                        )
-                    }
-                }
-                LibraryFilter.LIKED -> {
-                    if (state.likedSongs.isEmpty()) {
-                        item {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(32.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = "Songs you like will appear here.\nTap the heart on any track to save it.",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                                )
-                            }
+        AnimatedContent(
+            targetState = state.selectedFilter,
+            transitionSpec = {
+                fadeIn(animationSpec = filterEffectsSpec) togetherWith
+                    fadeOut(animationSpec = filterEffectsSpec)
+            },
+            label = "libraryFilterContent"
+        ) { selectedFilter ->
+            LazyColumn(
+                contentPadding = PaddingValues(bottom = 120.dp)
+            ) {
+                when (selectedFilter) {
+                    LibraryFilter.PLAYLISTS -> {
+                        items(state.playlists, key = { it.id }) { playlist ->
+                            TrackListItem(
+                                track = com.suspended.app.domain.model.Track(
+                                    id = playlist.id.toString(),
+                                    title = playlist.name,
+                                    artist = "${playlist.tracks.size} tracks",
+                                    thumbnailUrl = playlist.coverUrl
+                                ),
+                                onClick = { onNavigateToPlaylist(playlist.id) }
+                            )
                         }
-                    } else {
-                        items(state.likedSongs, key = { it.id }) { track ->
+                    }
+                    LibraryFilter.TRACKS -> {
+                        items(state.tracks, key = { it.id }) { track ->
                             TrackListItem(
                                 track = track,
-                                isLiked = true,
+                                isLiked = state.likedTrackIds.contains(track.id),
                                 onLikeClick = { viewModel.toggleLike(track) },
                                 onClick = { viewModel.playTrack(track) }
                             )
+                        }
+                    }
+                    LibraryFilter.ARTISTS -> {
+                        items(state.artists, key = { it.id }) { artist ->
+                            TrackListItem(
+                                track = com.suspended.app.domain.model.Track(
+                                    id = artist.id,
+                                    title = artist.name,
+                                    artist = "${artist.trackCount} tracks",
+                                    thumbnailUrl = artist.thumbnailUrl
+                                ),
+                                onClick = { }
+                            )
+                        }
+                    }
+                    LibraryFilter.DOWNLOADED -> {
+                        items(state.downloadedTracks, key = { it.id }) { track ->
+                            TrackListItem(
+                                track = track,
+                                isLiked = state.likedTrackIds.contains(track.id),
+                                onLikeClick = { viewModel.toggleLike(track) },
+                                onClick = { viewModel.playTrack(track) }
+                            )
+                        }
+                    }
+                    LibraryFilter.LIKED -> {
+                        if (state.likedSongs.isEmpty()) {
+                            item {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(32.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "Songs you like will appear here.\nTap the heart on any track to save it.",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                    )
+                                }
+                            }
+                        } else {
+                            items(state.likedSongs, key = { it.id }) { track ->
+                                TrackListItem(
+                                    track = track,
+                                    isLiked = true,
+                                    onLikeClick = { viewModel.toggleLike(track) },
+                                    onClick = { viewModel.playTrack(track) }
+                                )
+                            }
                         }
                     }
                 }
