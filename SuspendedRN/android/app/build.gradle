@@ -4,10 +4,9 @@ apply plugin: "com.facebook.react"
 apply plugin: "com.chaquo.python"
 
 react {
-    // Autolink disabled — we only use our own native modules (YtDlp + Playback)
+react {
+    autolinkLibrariesWithApp()
 }
-
-def enableProguardInReleaseBuilds = false
 def jscFlavor = 'org.webkit:android-jsc:+'
 
 android {
