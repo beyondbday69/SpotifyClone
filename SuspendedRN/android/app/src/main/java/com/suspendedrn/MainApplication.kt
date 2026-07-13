@@ -1,3 +1,7 @@
+package com.suspendedrn
+
+import android.app.Application
+import com.facebook.react.PackageList
 import com.facebook.react.ReactApplication
 import com.facebook.react.ReactHost
 import com.facebook.react.ReactNativeHost
@@ -39,8 +43,6 @@ class MainApplication : Application(), ReactApplication {
     if (BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) {
       load()
     }
-    // Boot the embedded Python interpreter (Chaquopy) so the yt-dlp bridge
-    // module is available to the BridgeModule on first call.
     if (!Python.isStarted()) {
       Python.start(AndroidPlatform(this))
     }
