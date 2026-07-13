@@ -6,7 +6,7 @@
 - Original app is a **Kotlin Android app** with Python+yt-dlp embedded via **Chaquopy** (`com.chaquo.python.Python`).
 - Goal: build a **React Native Android port** with same architecture — RN UI ↔ Kotlin native module ↔ Chaquopy running yt-dlp in-process. No VPS, no Termux.
 
-## Architecture (COMPLETED - Phase 1)
+## Architecture (COMPLETED - Phase 1 - BUILDING ON CI ✅)
 ```
 React Native (JS)
   └── src/api/index.ts              (calls NativeModules.YtDlp / .Playback)
@@ -21,7 +21,7 @@ Android native (Kotlin)
   └── bridge/YtDlpModule.kt         (NativeModules.YtDlp: search/resolve/download/cache)
   └── bridge/BridgePackage.kt
   └── playback/PlaybackController.kt (ExoPlayer + MediaSession singleton, events → JS)
-  └── playback/PlaybackModule.kt     (NativeModules.Playback: play/pause/seek/stop)
+  ��── playback/PlaybackModule.kt     (NativeModules.Playback: play/pause/seek/stop)
   └── playback/PlaybackService.kt    (foreground MediaSessionService)
   └── playback/PlaybackPackage.kt
 
@@ -30,13 +30,15 @@ Chaquopy
   └── Gradle: chaquopy { pip install yt-dlp==2026.7.4 }
 ```
 
-## User decisions
-- Android only
-- yt-dlp runs **inside** the Android process via Chaquopy (same as Kotlin app)
-- Local storage on device only (AsyncStorage for Zustand persist)
-- Drop Firebase/social/chat from the source Vite app
-- Keep: Home, Search, Library, LikedSongs, Player, Settings
-- Branch name: **`spotrn`**
+## CI Status
+- GitHub Actions: `.github/workflows/build-spotrn.yml` → **BUILDING SUCCESSFULLY** ✅
+- APK artifact: `suspendedrn-debug` (uploaded on each push to spotrn)
+- Key fixes needed to build:
+  - CLI downgraded to 14.1.0 (RN 0.76 compatible)
+  - react-native-screens pinned to 3.35.x (not 4.x which needs RN 0.84)
+  - Autolink disabled (we only use our own native modules)
+  - `--legacy-peer-deps` for npm install
+  - Groovy list syntax for ndk abiFilters (not Kotlin's `listOf()`)
 
 ## User behavior
 - Responds late (sometimes hours)
@@ -46,17 +48,10 @@ Chaquopy
 - Their current Kotlin app already hosts yt-dlp independently on the device via Chaquopy
 - Wants React Native port with same local yt-dlp approach
 
-## Constraints to remember
-- The existing Kotlin app is at `app/` — NOT deleting it yet (user may still want it)
-- Chaquopy 16.0.0 + Python 3.11 embedded in APK (~50-80 MB APK size)
-- Min SDK: 26 (Chaquopy requirement)
-- The source web app uses Zustand + HTMLAudioElement → swapped to native ExoPlayer
-- Firebase/social/chat removed from this port
-
 ## What's done
 - [x] Branch `spotrn` created
 - [x] Chaquopy Gradle plugin added to root + app build.gradle
-- [x] ytdlp_bridge.py + requirements.txt copied into `SuspendedRN/android/app/src/main/python/`
+- [x] ytdlp_bridge.py + requirements.txt copied into android/app/src/main/python/
 - [x] MainApplication.kt — initializes Python.start(AndroidPlatform(this))
 - [x] YtDlpModule.kt — NativeModule exposing search/resolve/download/cacheStreamUrl/getCachedStreamUrl
 - [x] BridgePackage.kt — registers YtDlpModule
@@ -65,7 +60,7 @@ Chaquopy
 - [x] PlaybackService.kt — foreground MediaSessionService for background playback
 - [x] PlaybackPackage.kt — registers PlaybackModule
 - [x] AndroidManifest.xml — INTERNET, FOREGROUND_SERVICE, MEDIA_PLAYBACK, POST_NOTIFICATIONS, WAKE_LOCK
-- [x] package.json — added @react-navigation/*, zustand, async-storage, react-native-screens, safe-area-context
+- [x] package.json — all deps with correct versions
 - [x] src/api/index.ts — JS API client wrapping both native modules
 - [x] src/store/playerStore.ts — Zustand store (ported from Vite playerStore, no Firebase/social)
 - [x] src/theme/index.ts — Spotify-inspired dark theme colors
@@ -73,14 +68,13 @@ Chaquopy
 - [x] src/components/MiniPlayer.tsx — floating mini player bar
 - [x] src/navigation/RootNavigator.tsx — bottom tabs + stack (modal for NowPlaying, LikedSongs)
 - [x] App.tsx — root entry point
+- [x] CI workflow → BUILDING SUCCESSFULLY ✅
 
 ## TODO next
-- [ ] Install npm packages (`cd SuspendedRN && npm install`)
-- [ ] Try build (`cd SuspendedRN/android && ./gradlew assembleDebug`)
-- [ ] Fix any Chaquopy / Kotlin compile errors
-- [ ] Add yt-dlp_bridge.py postprocessor support for ffmpeg (download needs it)
-- [ ] Wire up the NowPlaying screen as a modal triggered from MiniPlayer tap → navigation.navigate('NowPlaying')
+- [ ] Download APK artifact from GitHub Actions and test on device
 - [ ] Test search → resolve → play flow end-to-end
+- [ ] Wire up MiniPlayer tap → navigation.navigate('NowPlaying')
 - [ ] Add notification controls integration (MediaSessionMetadata)
 - [ ] Port remaining screens from source (AlbumDetails, ArtistDetails, PlaylistDetails) if needed
-- [ ] Consider adding a settings screen for streaming quality / theme color
+- [ ] Add a settings screen for streaming quality / theme color
+- [ ] Handle the case where autolink is disabled but react-native-screens still needs native linking

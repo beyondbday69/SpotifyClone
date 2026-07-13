@@ -3,8 +3,6 @@ name: Build SuspendedRN Android APK
 on:
   push:
     branches: [ spotrn ]
-  pull_request:
-    branches: [ spotrn ]
   workflow_dispatch:
 
 jobs:
@@ -28,33 +26,18 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install npm dependencies
+      - name: Install npm
         working-directory: SuspendedRN
-        run: |
-          rm -rf node_modules package-lock.json
-          npm install --legacy-peer-deps
+        run: npm install --legacy-peer-deps
 
-      - name: Verify autolink works
-        working-directory: SuspendedRN
-        run: npx react-native config 2>&1 | head -20 || echo "Config check completed"
-
-      - name: Clean Gradle caches
+      - name: Build APK
         working-directory: SuspendedRN/android
         run: |
-          rm -rf .gradle build app/build
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
 
-      - name: Grant execute permission for gradlew
-        working-directory: SuspendedRN/android
-        run: chmod +x gradlew
-
-      - name: Build debug APK (with Chaquopy + yt-dlp)
-        working-directory: SuspendedRN/android
-        run: ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tail -80
-
-      - name: Upload APK artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
-        if: success()
         with:
           name: suspendedrn-debug
           path: SuspendedRN/android/app/build/outputs/apk/debug/app-debug.apk
-          retention-days: 7
