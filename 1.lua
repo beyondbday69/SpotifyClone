@@ -660,7 +660,18 @@ local function ESPTick()
                 if ePos then
                     local dx,dy,dz=ePos.X-myPos.X,ePos.Y-myPos.Y,ePos.Z-myPos.Z
                     local dist=math.sqrt(dx*dx+dy*dy+dz*dz)
-                    local isBot=false;pcall(function()isBot=Game:IsAI(tPawn)end)
+                    local isBot=false
+                    pcall(function()
+                        if Game.IsAI then
+                            isBot=Game:IsAI(tPawn)
+                        elseif type(tPawn.IsAI)=="function" then
+                            isBot=tPawn:IsAI()
+                        elseif tPawn.bIsAI~=nil then
+                            isBot=tPawn.bIsAI
+                        elseif tPawn.IsBot~=nil then
+                            isBot=tPawn.IsBot
+                        end
+                    end)
                     if dist<600000 and HUD then
                         local distM=dist/100
                         local hp,maxHp=tPawn.Health,tPawn.HealthMax
@@ -677,17 +688,18 @@ local function ESPTick()
                         local hpOff=topZ+70+math.min(distM,60)*3+math.max(0,distM-60)*0.5
                         local scale=TextScale(distM)
                         local hz=headZ and(headZ.Z-ePos.Z+15)or 105
+                        -- Calculate line spacing safely regardless of HP/Distance toggles
+                        local ls=math.max(30,50*(scale/0.16))
                         pcall(function()HUD:AddDebugText("\226\151\128",tPawn,scale,{X=0,Y=0,Z=hz},{X=0,Y=0,Z=hz},espC,true,false,true,nil,1.0,true)end)
                         if S.HP~=false then
                             local hpS=isKnock and"\226\150\188"or string.format("[%d/100]",math.max(0,math.min(100,math.floor(hpPct*100+0.5))))
                             pcall(function()HUD:AddDebugText(hpS,tPawn,scale,{X=0,Y=0,Z=hpOff},{X=0,Y=0,Z=hpOff},hpC,true,false,true,nil,1.0,true)end)
                         end
                         if S.Distance~=false then
-                            local ls=math.max(30,50*(scale/0.16))
                             local dt=string.format("[%.0fm]",distM)
                             pcall(function()HUD:AddDebugText(dt,tPawn,scale,{X=0,Y=0,Z=hpOff+ls*1.5},{X=0,Y=0,Z=hpOff+ls*1.5},espC,true,false,true,nil,1.0,true)end)
                         end
-                        -- Draw [BOT] label on bots
+                        -- Draw [BOT] label on bots (ALWAYS visible regardless of HP/Distance toggles)
                         if isBot then
                             local botColor={R=0,G=255,B=255,A=255} -- Cyan
                             local botOff=hpOff+ls*2.5
